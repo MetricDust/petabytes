@@ -1,75 +1,99 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  --background: #f5f5f7;
+  --foreground: #1d1d1f;
 }
 
 @layer base {
   body {
-    @apply bg-neutral-950 text-gray-200;
+    @apply bg-[var(--background)] text-[var(--foreground)] font-sans antialiased;
+    background-image:
+      radial-gradient(
+        circle at 15% 50%,
+        rgba(209, 209, 214, 0.4) 0%,
+        transparent 25%
+      ),
+      radial-gradient(
+        circle at 85% 30%,
+        rgba(255, 59, 48, 0.08) 0%,
+        transparent 25%
+      );
+    background-attachment: fixed;
   }
 }
 
-/* Custom Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
+/* Glass / Vision Pro Card System */
+.glass-card {
+  @apply bg-white/60 backdrop-blur-2xl border border-white/60 shadow-xl rounded-[32px];
+  box-shadow:
+    0 10px 30px -10px rgba(0, 0, 0, 0.05),
+    0 4px 6px -4px rgba(0, 0, 0, 0.02),
+    inset 0 1px 1px rgba(255, 255, 255, 0.9);
+}
+
+.glass-card-hover {
+  @apply transition-all duration-300 ease-out;
+}
+
+.glass-card-hover:hover {
+  @apply bg-white/80 shadow-2xl;
+  transform: translateY(-4px) scale(1.01);
+  box-shadow:
+    0 20px 40px -12px rgba(0, 0, 0, 0.1),
+    0 8px 12px -8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 1px rgba(255, 255, 255, 0.9);
+}
+
+.glass-pill {
+  @apply bg-white/70 backdrop-blur-lg border border-white/40 shadow-sm rounded-full;
+}
+
+/* Typography & Effects */
+.text-shimmer {
+  background: linear-gradient(
+    to right,
+    #1d1d1f 0%,
+    #8e8e93 20%,
+    #1d1d1f 40%,
+    #1d1d1f 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 5s linear infinite;
+}
+
+.text-gradient-red {
+  background: linear-gradient(135deg, #ff3b30, #ff9f0a);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@keyframes shimmer {
   to {
-    opacity: 1;
+    background-position: 200% center;
+  }
+}
+
+/* Animations */
+@keyframes float {
+  0%,
+  100% {
     transform: translateY(0);
   }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.8s ease-out forwards;
-}
-
-.glass {
-  @apply backdrop-blur-md border border-white/5 bg-black/20;
-}
-
-.gradient-text {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-gray-100 to-gray-400;
-}
-
-.glow-red {
-  text-shadow: 0 0 20px rgba(220, 38, 38, 0.5);
-}
-
-@keyframes spin-slow {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-spin-slow {
-  animation: spin-slow 8s linear infinite;
-}
-
-@keyframes textShimmer {
-  0% {
-    background-position: 0% 50%;
-  }
   50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
+    transform: translateY(-10px);
   }
 }
 
-.animate-shimmer {
-  background-size: 200% auto;
-  animation: textShimmer 3s linear infinite;
+.animate-float {
+  animation: float 6s ease-in-out infinite;
 }
 
-@keyframes softPulse {
+@keyframes pulse-soft {
   0%,
   100% {
     opacity: 1;
@@ -77,10 +101,10 @@
   }
   50% {
     opacity: 0.8;
-    transform: scale(1.02);
+    transform: scale(0.98);
   }
 }
 
-.animate-soft-pulse {
-  animation: softPulse 2s ease-in-out infinite;
+.animate-pulse-soft {
+  animation: pulse-soft 3s ease-in-out infinite;
 }
