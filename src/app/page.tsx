@@ -34,6 +34,37 @@ export default function Home() {
     });
   };
 
+  // Scroll Logic for Workflow
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!workflowRef.current) return;
+      const rect = workflowRef.current.getBoundingClientRect();
+      const sectionHeight = rect.height;
+      const viewportHeight = window.innerHeight;
+
+      // Calculate progress: 0 when entering, 1 when finished scrolling the section
+      const scrollDist = -rect.top;
+      const totalScrollable = sectionHeight - viewportHeight;
+
+      if (scrollDist < 0) return; // Before section
+
+      if (scrollDist > totalScrollable) {
+        if (hoveredWorkflowStep !== 2) setHoveredWorkflowStep(2);
+        return;
+      }
+
+      const progress = Math.max(0, Math.min(1, scrollDist / totalScrollable));
+      const step = Math.min(2, Math.floor(progress * 3));
+
+      if (hoveredWorkflowStep !== step) {
+        setHoveredWorkflowStep(step);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [hoveredWorkflowStep]);
+
   useEffect(() => {
     const timer = setInterval(() => {
       setActiveStep((prev) => (prev + 1) % 4);
@@ -42,7 +73,17 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen overflow-x-hidden selection:bg-red-500/20 selection:text-red-600">
+    <div className="min-h-screen bg-[#E4E7EB] text-gray-800 font-sans selection:bg-red-500/20 selection:text-red-900 relative">
+      {/* Background Lighting/Sheen */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        {/* Top light source */}
+        <div className="absolute top-[-20%] left-[20%] w-[60%] h-[60%] bg-white/40 rounded-full blur-[150px]" />
+        {/* Subtle red ambient glow */}
+        <div className="absolute top-[30%] right-[-10%] w-[40%] h-[40%] bg-red-500/5 rounded-full blur-[120px]" />
+        {/* Bottom cool shadow */}
+        <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-gray-400/10 rounded-full blur-[100px]" />
+      </div>
+
       {/* Navbar */}
       <nav className="fixed top-6 left-0 right-0 z-50 flex justify-center w-full px-6">
         <div className="max-w-5xl w-full glass-pill px-6 h-16 flex items-center justify-between">
@@ -81,7 +122,7 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative pt-48 pb-24 px-6">
+      <section className="relative z-10 pt-48 pb-24 px-6">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
           {/* Hero Content */}
           <div className="space-y-8 relative z-10">
@@ -244,10 +285,7 @@ export default function Home() {
       </section>
 
       {/* Stats Workflow Board (Data-Driven) */}
-      <section className="py-24 px-6 relative overflow-hidden">
-        {/* Background Elements */}
-        <div className="absolute inset-0 bg-gray-50/50 -z-10" />
-
+      <section className="py-24 px-6 relative overflow-hidden z-10">
         <div className="max-w-7xl mx-auto">
           <div className="mb-16 text-center">
             <h2 className="text-3xl font-bold text-gray-900">Platform Scale</h2>
@@ -310,7 +348,7 @@ export default function Home() {
             {/* Stats Cards Container (Workflow Style) */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative z-10">
               {/* Stat 1: Latency */}
-              <div className="glass-card p-6 bg-white/60 relative group hover:-translate-y-1 transition-transform duration-300">
+              <div className="glass-card p-6 relative group hover:-translate-y-1 transition-transform duration-300">
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold ring-4 ring-white">
                   1
                 </div>
@@ -328,7 +366,7 @@ export default function Home() {
               </div>
 
               {/* Stat 2: Uptime */}
-              <div className="glass-card p-6 bg-white/60 relative group hover:-translate-y-1 transition-transform duration-300">
+              <div className="glass-card p-6 relative group hover:-translate-y-1 transition-transform duration-300">
                 <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-gray-900 rounded-full flex items-center justify-center text-white text-xs font-bold ring-4 ring-white">
                   2
                 </div>
@@ -346,7 +384,7 @@ export default function Home() {
               </div>
 
               {/* Stat 3: Integrations */}
-              <div className="glass-card p-6 bg-white/60 relative group hover:-translate-y-1 transition-transform duration-300">
+              <div className="glass-card p-6 relative group hover:-translate-y-1 transition-transform duration-300">
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-gray-900 rounded-full flex items-center justify-center text-white text-xs font-bold ring-4 ring-white">
                   3
                 </div>
@@ -364,7 +402,7 @@ export default function Home() {
               </div>
 
               {/* Stat 4: Active Builds */}
-              <div className="glass-card p-6 bg-white/60 relative group hover:-translate-y-1 transition-transform duration-300">
+              <div className="glass-card p-6 relative group hover:-translate-y-1 transition-transform duration-300">
                 <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold ring-4 ring-white">
                   4
                 </div>
@@ -386,7 +424,7 @@ export default function Home() {
       </section>
 
       {/* Features Grid */}
-      <section id="features" className="py-32 px-6">
+      <section id="features" className="py-32 px-6 relative z-10">
         <div className="max-w-7xl mx-auto">
           <div className="mb-20 text-center max-w-3xl mx-auto">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900 tracking-tight">
@@ -399,48 +437,101 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Feature 1 */}
-            <div className="glass-card-hover glass-card p-8 bg-white/50">
-              <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mb-6 border border-red-100 shadow-sm">
-                <Globe className="w-7 h-7 text-red-600" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">
-                HTTP to MCP
-              </h3>
-              <p className="text-gray-500 leading-relaxed font-medium">
-                Directly ingest REST, GraphQL, or SOAP endpoints. We handle the
-                schema mapping automatically.
-              </p>
-            </div>
+          {/* Dynamic Expanding Features - Wireframe Implementation */}
+          {/* Dynamic Expanding Features - Wireframe Implementation */}
+          <div className="flex flex-col lg:flex-row gap-4 h-auto lg:h-[400px] transition-all">
+            {[
+              {
+                id: 1,
+                title: "HTTP to MCP",
+                desc: "Directly ingest REST, GraphQL, or SOAP endpoints. We handle the schema mapping automatically.",
+                icon: Globe,
+                visual: (
+                  <Image
+                    src="/images/feat1.png"
+                    alt="HTTP to MCP Interface"
+                    fill
+                    className="object-contain"
+                  />
+                ),
+              },
+              {
+                id: 2,
+                title: "Live Testing Console",
+                desc: "Debug your MCP tools in real-time before deploying. See exactly what the LLM sees.",
+                icon: Terminal,
+                visual: (
+                  <Image
+                    src="/images/feat2.png"
+                    alt="Live Testing Console"
+                    fill
+                    className="object-contain"
+                  />
+                ),
+              },
+              {
+                id: 3,
+                title: "One-Click Deploy",
+                desc: "Push to our edge network or export as a Docker container. Your infrastructure, your choice.",
+                icon: Box,
+                visual: (
+                  <Image
+                    src="/images/feat3.png"
+                    alt="Deployment Dashboard"
+                    fill
+                    className="object-contain"
+                  />
+                ),
+              },
+            ].map((feature, i) => (
+              <div
+                key={feature.id}
+                className="group relative flex-1 hover:flex-[3] transition-[flex-grow] duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)] min-h-[240px] lg:min-h-full cursor-pointer z-0"
+              >
+                {/* Connector Line (visible on desktop) */}
+                {i < 2 && (
+                  <div className="hidden lg:block absolute -right-5 top-1/2 -translate-y-1/2 w-6 border-t-2 border-dashed border-gray-400/50 z-[-1]" />
+                )}
 
-            {/* Feature 2 */}
-            <div className="glass-card-hover glass-card p-8 bg-white/50">
-              <div className="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center mb-6 border border-gray-100 shadow-sm">
-                <Terminal className="w-7 h-7 text-gray-700" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">
-                Live Testing Console
-              </h3>
-              <p className="text-gray-500 leading-relaxed font-medium">
-                Debug your MCP tools in real-time before deploying. See exactly
-                what the LLM sees.
-              </p>
-            </div>
+                {/* Card Container (Inner) */}
+                <div className="w-full h-full relative overflow-hidden rounded-[2.5rem] border border-white/20 shadow-xl">
+                  {/* Main Background (Red Gradient - Visible initially) */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-red-600 to-red-700 opacity-100 transition-colors duration-500" />
 
-            {/* Feature 3 */}
-            <div className="glass-card-hover glass-card p-8 bg-white/50">
-              <div className="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center mb-6 border border-gray-100 shadow-sm">
-                <Box className="w-7 h-7 text-gray-700" />
+                  {/* Inner Flex Container - Creates the 'Split Card' layout */}
+                  <div className="absolute inset-0 flex p-3 gap-3">
+                    {/* Left Side: Visual/Image Card (Reveals on Hover) */}
+                    <div className="hidden lg:block w-0 group-hover:w-1/2 transition-[width] duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)] relative overflow-hidden rounded-[2rem]">
+                      {feature.visual}
+                    </div>
+
+                    {/* Right Side: Content Card (Transitions to White on Hover) */}
+                    <div className="flex-1 rounded-[2rem] p-8 flex flex-col justify-between relative z-10 transition-all duration-500 group-hover:bg-white group-hover:shadow-2xl">
+                      <div>
+                        {/* Icon: Transitions from Glass to Red on White Background */}
+                        <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center mb-6 text-white shadow-lg group-hover:bg-red-50 group-hover:border-red-100 group-hover:text-red-600 transition-all duration-500">
+                          <feature.icon className="w-6 h-6" />
+                        </div>
+
+                        <h3 className="text-2xl font-bold mb-3 whitespace-nowrap transition-colors duration-500 text-white group-hover:text-gray-900">
+                          {feature.title}
+                        </h3>
+
+                        <p className="text-sm md:text-base font-medium leading-relaxed max-w-md transition-colors duration-500 text-white/80 group-hover:text-gray-500">
+                          {feature.desc}
+                        </p>
+                      </div>
+
+                      {/* Arrow / CTA */}
+                      <div className="flex items-center gap-2 font-bold text-sm tracking-widest uppercase transition-all duration-500 translate-y-2 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 text-white group-hover:text-red-600">
+                        <span>Explore</span>
+                        <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">
-                One-Click Deploy
-              </h3>
-              <p className="text-gray-500 leading-relaxed font-medium">
-                Push to our edge network or export as a Docker container. Your
-                infrastructure, your choice.
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -450,170 +541,172 @@ export default function Home() {
         id="workflow"
         ref={workflowRef}
         onMouseMove={handleMouseMove}
-        className="py-32 px-6 relative overflow-hidden bg-white/50"
+        className="relative z-10 h-[400vh]"
       >
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-20 items-center">
-            {/* Visual */}
-            <div className="relative aspect-square order-2 md:order-1">
-              <div className="absolute inset-0 bg-gradient-to-tr from-gray-200 to-red-50 rounded-full blur-[100px]" />
-              <div className="glass-card w-full h-full p-8 flex flex-col relative z-10">
-                {/* Dynamic Content */}
-                <div className="flex-1 relative">
-                  {hoveredWorkflowStep === 0 && (
-                    <div className="animate-fade-in flex flex-col h-full items-center justify-center text-center space-y-6">
-                      <div className="w-24 h-24 rounded-full bg-red-100 flex items-center justify-center relative">
-                        <div className="absolute inset-0 bg-red-200 rounded-full animate-ping opacity-20"></div>
-                        <Globe className="w-10 h-10 text-red-600" />
+        <div className="sticky top-0 h-screen flex items-center justify-center w-full overflow-hidden">
+          <div className="max-w-7xl mx-auto w-full px-6">
+            <div className="grid md:grid-cols-2 gap-20 items-center">
+              {/* Visual */}
+              <div className="relative aspect-square order-2 md:order-1">
+                <div className="absolute inset-0 bg-gradient-to-tr from-gray-200 to-red-50 rounded-full blur-[100px]" />
+                <div className="glass-card w-full h-full p-8 flex flex-col relative z-10">
+                  {/* Dynamic Content */}
+                  <div className="flex-1 relative">
+                    {hoveredWorkflowStep === 0 && (
+                      <div className="animate-fade-in flex flex-col h-full items-center justify-center text-center space-y-6">
+                        <div className="w-24 h-24 rounded-full bg-red-100 flex items-center justify-center relative">
+                          <div className="absolute inset-0 bg-red-200 rounded-full animate-ping opacity-20"></div>
+                          <Globe className="w-10 h-10 text-red-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-red-500 uppercase tracking-widest mb-2">
+                            Connecting
+                          </p>
+                          <h4 className="text-2xl font-bold text-gray-900">
+                            Endpoint Config
+                          </h4>
+                        </div>
+                        <div className="glass-pill px-6 py-3 font-mono text-sm text-gray-500 bg-white/50">
+                          https://api.petabytes.com/v1
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-xs font-bold text-red-500 uppercase tracking-widest mb-2">
-                          Connecting
-                        </p>
-                        <h4 className="text-2xl font-bold text-gray-900">
-                          Endpoint Config
+                    )}
+
+                    {hoveredWorkflowStep === 1 && (
+                      <div className="animate-fade-in flex flex-col h-full bg-gray-50 rounded-2xl p-6 border border-gray-100 shadow-inner">
+                        <div className="flex items-center gap-2 mb-4 border-b border-gray-200 pb-4">
+                          <Code className="w-5 h-5 text-gray-400" />
+                          <span className="text-sm font-bold text-gray-600 font-mono">
+                            Transform Logic
+                          </span>
+                        </div>
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                            <div className="h-2 w-24 bg-gray-200 rounded"></div>
+                            <ArrowRight className="w-3 h-3 text-gray-300" />
+                            <div className="h-2 w-32 bg-gray-300 rounded"></div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                            <div className="h-2 w-16 bg-gray-200 rounded"></div>
+                            <ArrowRight className="w-3 h-3 text-gray-300" />
+                            <div className="h-2 w-28 bg-gray-300 rounded"></div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                            <div className="h-2 w-20 bg-gray-200 rounded"></div>
+                            <ArrowRight className="w-3 h-3 text-gray-300" />
+                            <div className="h-2 w-16 bg-gray-300 rounded"></div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {hoveredWorkflowStep === 2 && (
+                      <div className="animate-fade-in flex flex-col h-full items-center justify-center text-center">
+                        <div className="w-32 h-32 relative mb-6">
+                          <svg
+                            viewBox="0 0 100 100"
+                            className="w-full h-full rotate-90"
+                          >
+                            <circle
+                              cx="50"
+                              cy="50"
+                              r="45"
+                              fill="none"
+                              stroke="#F3F4F6"
+                              strokeWidth="8"
+                            />
+                            <circle
+                              cx="50"
+                              cy="50"
+                              r="45"
+                              fill="none"
+                              stroke="#10B981"
+                              strokeWidth="8"
+                              strokeDasharray="283"
+                              strokeDashoffset="0"
+                              className="animate-[spin_2s_linear_infinite]"
+                            />
+                          </svg>
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <CheckCircle className="w-12 h-12 text-green-500" />
+                          </div>
+                        </div>
+                        <h4 className="text-2xl font-bold text-gray-900 mb-2">
+                          Build Complete
                         </h4>
+                        <p className="text-gray-500">Ready for deployment</p>
                       </div>
-                      <div className="glass-pill px-6 py-3 font-mono text-sm text-gray-500 bg-white/50">
-                        https://api.petabytes.com/v1
-                      </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
 
-                  {hoveredWorkflowStep === 1 && (
-                    <div className="animate-fade-in flex flex-col h-full bg-gray-50 rounded-2xl p-6 border border-gray-100 shadow-inner">
-                      <div className="flex items-center gap-2 mb-4 border-b border-gray-200 pb-4">
-                        <Code className="w-5 h-5 text-gray-400" />
-                        <span className="text-sm font-bold text-gray-600 font-mono">
-                          Transform Logic
-                        </span>
-                      </div>
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                          <div className="h-2 w-24 bg-gray-200 rounded"></div>
-                          <ArrowRight className="w-3 h-3 text-gray-300" />
-                          <div className="h-2 w-32 bg-gray-300 rounded"></div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                          <div className="h-2 w-16 bg-gray-200 rounded"></div>
-                          <ArrowRight className="w-3 h-3 text-gray-300" />
-                          <div className="h-2 w-28 bg-gray-300 rounded"></div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                          <div className="h-2 w-20 bg-gray-200 rounded"></div>
-                          <ArrowRight className="w-3 h-3 text-gray-300" />
-                          <div className="h-2 w-16 bg-gray-300 rounded"></div>
-                        </div>
-                      </div>
+                  {/* Footer Controls */}
+                  <div className="mt-8 pt-6 border-t border-gray-100 flex justify-between items-center text-xs font-bold text-gray-400 uppercase tracking-widest">
+                    <span>Petabytes Engine v2.4</span>
+                    <div className="flex gap-1.5">
+                      <div
+                        className={`w-2 h-2 rounded-full ${hoveredWorkflowStep === 0 ? "bg-red-500" : "bg-gray-300"}`}
+                      ></div>
+                      <div
+                        className={`w-2 h-2 rounded-full ${hoveredWorkflowStep === 1 ? "bg-red-500" : "bg-gray-300"}`}
+                      ></div>
+                      <div
+                        className={`w-2 h-2 rounded-full ${hoveredWorkflowStep === 2 ? "bg-green-500" : "bg-gray-300"}`}
+                      ></div>
                     </div>
-                  )}
-
-                  {hoveredWorkflowStep === 2 && (
-                    <div className="animate-fade-in flex flex-col h-full items-center justify-center text-center">
-                      <div className="w-32 h-32 relative mb-6">
-                        <svg
-                          viewBox="0 0 100 100"
-                          className="w-full h-full rotate-90"
-                        >
-                          <circle
-                            cx="50"
-                            cy="50"
-                            r="45"
-                            fill="none"
-                            stroke="#F3F4F6"
-                            strokeWidth="8"
-                          />
-                          <circle
-                            cx="50"
-                            cy="50"
-                            r="45"
-                            fill="none"
-                            stroke="#10B981"
-                            strokeWidth="8"
-                            strokeDasharray="283"
-                            strokeDashoffset="0"
-                            className="animate-[spin_2s_linear_infinite]"
-                          />
-                        </svg>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <CheckCircle className="w-12 h-12 text-green-500" />
-                        </div>
-                      </div>
-                      <h4 className="text-2xl font-bold text-gray-900 mb-2">
-                        Build Complete
-                      </h4>
-                      <p className="text-gray-500">Ready for deployment</p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Footer Controls */}
-                <div className="mt-8 pt-6 border-t border-gray-100 flex justify-between items-center text-xs font-bold text-gray-400 uppercase tracking-widest">
-                  <span>Petabytes Engine v2.4</span>
-                  <div className="flex gap-1.5">
-                    <div
-                      className={`w-2 h-2 rounded-full ${hoveredWorkflowStep === 0 ? "bg-red-500" : "bg-gray-300"}`}
-                    ></div>
-                    <div
-                      className={`w-2 h-2 rounded-full ${hoveredWorkflowStep === 1 ? "bg-red-500" : "bg-gray-300"}`}
-                    ></div>
-                    <div
-                      className={`w-2 h-2 rounded-full ${hoveredWorkflowStep === 2 ? "bg-green-500" : "bg-gray-300"}`}
-                    ></div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Text Steps */}
-            <div className="order-1 md:order-2">
-              <h2 className="text-3xl md:text-5xl font-bold mb-8 text-gray-900">
-                From URL to <br />
-                <span className="text-gradient-red">Agent Capability</span>
-              </h2>
+              {/* Text Steps */}
+              <div className="order-1 md:order-2">
+                <h2 className="text-3xl md:text-5xl font-bold mb-8 text-gray-900">
+                  From URL to <br />
+                  <span className="text-gradient-red">Agent Capability</span>
+                </h2>
 
-              <div className="space-y-6">
-                {[
-                  {
-                    title: "Connect Data Source",
-                    desc: "Plug in any HTTP/HTTPS URL. We support Auth headers, OAuth, and custom params.",
-                  },
-                  {
-                    title: "Define Logic",
-                    desc: "Use our visual node editor to transform raw JSON into semantic context for AI.",
-                  },
-                  {
-                    title: "Export MCP",
-                    desc: "Get a standardized MCP server link compatible with Claude, OpenAI, and more.",
-                  },
-                ].map((step, i) => (
-                  <div
-                    key={i}
-                    className={`group p-6 rounded-2xl cursor-pointer transition-all duration-300 border ${hoveredWorkflowStep === i ? "bg-white border-red-100 shadow-xl shadow-red-500/5 scale-102" : "bg-transparent border-transparent hover:bg-white/50"}`}
-                    onMouseEnter={() => setHoveredWorkflowStep(i)}
-                  >
-                    <div className="flex items-start gap-4">
-                      <div
-                        className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${hoveredWorkflowStep === i ? "bg-red-600 text-white" : "bg-gray-200 text-gray-500"}`}
-                      >
-                        {i + 1}
-                      </div>
-                      <div>
-                        <h4
-                          className={`text-lg font-bold mb-2 transition-colors ${hoveredWorkflowStep === i ? "text-gray-900" : "text-gray-500"}`}
+                <div className="space-y-6">
+                  {[
+                    {
+                      title: "Connect Data Source",
+                      desc: "Plug in any HTTP/HTTPS URL. We support Auth headers, OAuth, and custom params.",
+                    },
+                    {
+                      title: "Define Logic",
+                      desc: "Use our visual node editor to transform raw JSON into semantic context for AI.",
+                    },
+                    {
+                      title: "Export MCP",
+                      desc: "Get a standardized MCP server link compatible with Claude, OpenAI, and more.",
+                    },
+                  ].map((step, i) => (
+                    <div
+                      key={i}
+                      className={`group p-6 rounded-2xl cursor-pointer transition-all duration-300 border ${hoveredWorkflowStep === i ? "bg-white border-red-100 shadow-xl shadow-red-500/5 scale-102" : "bg-transparent border-transparent hover:bg-white/50"}`}
+                      onMouseEnter={() => setHoveredWorkflowStep(i)}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div
+                          className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${hoveredWorkflowStep === i ? "bg-red-600 text-white" : "bg-gray-200 text-gray-500"}`}
                         >
-                          {step.title}
-                        </h4>
-                        <p className="text-gray-500 text-sm leading-relaxed">
-                          {step.desc}
-                        </p>
+                          {i + 1}
+                        </div>
+                        <div>
+                          <h4
+                            className={`text-lg font-bold mb-2 transition-colors ${hoveredWorkflowStep === i ? "text-gray-900" : "text-gray-500"}`}
+                          >
+                            {step.title}
+                          </h4>
+                          <p className="text-gray-500 text-sm leading-relaxed">
+                            {step.desc}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -621,7 +714,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 px-6 relative overflow-hidden">
+      <section className="py-24 px-6 relative overflow-hidden z-10">
         <div className="max-w-5xl mx-auto text-center relative z-10 glass-card p-12 bg-gradient-to-br from-white to-gray-50">
           <h2 className="text-4xl md:text-6xl font-bold mb-6 text-gray-900 tracking-tight">
             Ready to automate?
@@ -645,7 +738,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-gray-200 py-12 px-6 bg-white/50 backdrop-blur-xl">
+      <footer className="border-t border-gray-200 py-12 px-6 bg-white/50 backdrop-blur-xl relative z-10">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2">
             <div className="p-1.5 rounded-md bg-red-50">

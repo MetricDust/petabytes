@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f5f5f7;
+  --background: #e4e5e9;
   --foreground: #1d1d1f;
 }
 
@@ -9,15 +9,11 @@
   body {
     @apply bg-[var(--background)] text-[var(--foreground)] font-sans antialiased;
     background-image:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, transparent 100%),
       radial-gradient(
-        circle at 15% 50%,
-        rgba(209, 209, 214, 0.4) 0%,
-        transparent 25%
-      ),
-      radial-gradient(
-        circle at 85% 30%,
-        rgba(255, 59, 48, 0.08) 0%,
-        transparent 25%
+        circle at 50% 0%,
+        rgba(255, 255, 255, 0.8) 0%,
+        transparent 60%
       );
     background-attachment: fixed;
   }
@@ -25,11 +21,11 @@
 
 /* Glass / Vision Pro Card System */
 .glass-card {
-  @apply bg-white/60 backdrop-blur-2xl border border-white/60 shadow-xl rounded-[32px];
+  @apply bg-white/70 backdrop-blur-2xl border border-white/90 shadow-2xl rounded-[32px];
   box-shadow:
-    0 10px 30px -10px rgba(0, 0, 0, 0.05),
-    0 4px 6px -4px rgba(0, 0, 0, 0.02),
-    inset 0 1px 1px rgba(255, 255, 255, 0.9);
+    20px 20px 40px -10px rgba(163, 177, 198, 0.4),
+    -10px -10px 30px rgba(255, 255, 255, 0.8),
+    inset 0 1px 1px rgba(255, 255, 255, 1);
 }
 
 .glass-card-hover {
@@ -37,16 +33,20 @@
 }
 
 .glass-card-hover:hover {
-  @apply bg-white/80 shadow-2xl;
-  transform: translateY(-4px) scale(1.01);
+  @apply bg-white/90;
+  transform: translateY(-6px) scale(1.02);
   box-shadow:
-    0 20px 40px -12px rgba(0, 0, 0, 0.1),
-    0 8px 12px -8px rgba(0, 0, 0, 0.04),
-    inset 0 1px 1px rgba(255, 255, 255, 0.9);
+    25px 25px 50px -12px rgba(163, 177, 198, 0.5),
+    -12px -12px 40px rgba(255, 255, 255, 0.9),
+    inset 0 1px 1px rgba(255, 255, 255, 1);
 }
 
 .glass-pill {
-  @apply bg-white/70 backdrop-blur-lg border border-white/40 shadow-sm rounded-full;
+  @apply bg-white/70 backdrop-blur-lg border border-white/80 shadow-lg rounded-full;
+  box-shadow:
+    10px 10px 20px -5px rgba(163, 177, 198, 0.4),
+    -5px -5px 15px rgba(255, 255, 255, 0.8),
+    inset 0 1px 1px rgba(255, 255, 255, 1);
 }
 
 /* Typography & Effects */
