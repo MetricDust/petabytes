@@ -66,10 +66,12 @@
 }
 
 .text-gradient-red {
-  background: linear-gradient(135deg, #ff3b30, #ff9f0a);
+  background: linear-gradient(to right, #ff3b30 0%, #ff9f0a 50%, #ff3b30 100%);
+  background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+  animation: shimmer 3s linear infinite;
 }
 
 @keyframes shimmer {

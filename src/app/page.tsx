@@ -76,6 +76,9 @@ export default function Home() {
     <div className="min-h-screen bg-[#E4E7EB] text-gray-800 font-sans selection:bg-red-500/20 selection:text-red-900 relative">
       {/* Background Lighting/Sheen */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        {/* Breathing Top-Left Corner Glow */}
+        <div className="absolute top-[-15%] left-[-15%] w-[60%] h-[60%] bg-gradient-to-br from-red-500/30 to-red-600/5 rounded-full blur-[120px] opacity-70 animate-pulse-soft" />
+
         {/* Top light source */}
         <div className="absolute top-[-20%] left-[20%] w-[60%] h-[60%] bg-white/40 rounded-full blur-[150px]" />
         {/* Subtle red ambient glow */}
@@ -120,6 +123,50 @@ export default function Home() {
           </button>
         </div>
       </nav>
+
+      {/* Global Workflow Connector (Hero -> Features) */}
+      <div className="absolute top-0 left-0 right-0 h-[1500px] max-w-7xl mx-auto px-6 pointer-events-none z-[5] hidden lg:block overflow-visible">
+        <svg
+          className="w-full h-full overflow-visible"
+          viewBox="0 0 1200 1500"
+          fill="none"
+          preserveAspectRatio="none"
+        >
+          <defs>
+            <marker
+              id="arrowhead"
+              markerWidth="10"
+              markerHeight="7"
+              refX="9"
+              refY="3.5"
+              orient="auto"
+            >
+              <polygon points="0 0, 10 3.5, 0 7" fill="#ef4444" />
+            </marker>
+          </defs>
+
+          {/* The Circuit Path */}
+          <path
+            d="M 950 550 V 675 Q 950 700 925 700 H 140 Q 115 700 115 725 V 1080"
+            stroke="#ef4444"
+            strokeWidth="3"
+            strokeDasharray="12 12"
+            strokeLinecap="round"
+            fill="none"
+            markerEnd="url(#arrowhead)"
+            className="opacity-40"
+          />
+
+          {/* Animated Pulse along the path */}
+          <circle r="5" fill="#ef4444" className="opacity-60">
+            <animateMotion
+              dur="4s"
+              repeatCount="indefinite"
+              path="M 950 550 V 675 Q 950 700 925 700 H 140 Q 115 700 115 725 V 1080"
+            />
+          </circle>
+        </svg>
+      </div>
 
       {/* Hero Section */}
       <section className="relative z-10 pt-48 pb-24 px-6">
@@ -285,7 +332,7 @@ export default function Home() {
       </section>
 
       {/* Stats Workflow Board (Data-Driven) */}
-      <section className="py-24 px-6 relative overflow-hidden z-10">
+      <section className="py-24 px-6 relative z-10">
         <div className="max-w-7xl mx-auto">
           <div className="mb-16 text-center">
             <h2 className="text-3xl font-bold text-gray-900">Platform Scale</h2>
@@ -298,37 +345,44 @@ export default function Home() {
             {/* SVG Connectors Layer - Hidden on mobile, visible on lg screens */}
             <div className="hidden lg:block absolute inset-0 pointer-events-none z-0">
               <svg
-                className="w-full h-full"
+                className="w-full h-full overflow-visible"
                 viewBox="0 0 1200 200"
                 fill="none"
-                preserveAspectRatio="none"
               >
-                {/* Path 1: Card 1 Top -> Card 2 Top */}
+                {/* Top Path: Right Flow */}
                 <path
-                  d="M 250 50 C 250 20, 350 20, 350 50"
-                  stroke="url(#gradient-line)"
-                  strokeWidth="2"
-                  strokeDasharray="6 6"
-                  className="animate-pulse"
+                  d="M 0 50 H 1200"
+                  stroke="#ef4444"
+                  strokeWidth="3"
+                  strokeDasharray="12 12"
+                  className="opacity-40"
                 />
-                {/* Path 2: Card 2 Bottom -> Card 3 Bottom */}
+                {/* Bottom Path: Left Flow */}
                 <path
-                  d="M 550 150 C 550 180, 650 180, 650 150"
-                  stroke="url(#gradient-line)"
-                  strokeWidth="2"
-                  strokeDasharray="6 6"
-                  className="animate-pulse"
-                  style={{ animationDelay: "0.5s" }}
+                  d="M 1200 150 H 0"
+                  stroke="#ef4444"
+                  strokeWidth="3"
+                  strokeDasharray="12 12"
+                  className="opacity-40"
                 />
-                {/* Path 3: Card 3 Top -> Card 4 Top */}
-                <path
-                  d="M 850 50 C 850 20, 950 20, 950 50"
-                  stroke="url(#gradient-line)"
-                  strokeWidth="2"
-                  strokeDasharray="6 6"
-                  className="animate-pulse"
-                  style={{ animationDelay: "1s" }}
-                />
+
+                {/* Animated Particle (Top - Moving Right) */}
+                <circle r="5" fill="#ef4444" className="opacity-60">
+                  <animateMotion
+                    dur="6s"
+                    repeatCount="indefinite"
+                    path="M 0 50 H 1200"
+                  />
+                </circle>
+
+                {/* Animated Particle (Bottom - Moving Left) */}
+                <circle r="5" fill="#ef4444" className="opacity-60">
+                  <animateMotion
+                    dur="6s"
+                    repeatCount="indefinite"
+                    path="M 1200 150 H 0"
+                  />
+                </circle>
                 <defs>
                   <linearGradient
                     id="gradient-line"
@@ -346,7 +400,7 @@ export default function Home() {
             </div>
 
             {/* Stats Cards Container (Workflow Style) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative z-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 relative z-10">
               {/* Stat 1: Latency */}
               <div className="glass-card p-6 relative group hover:-translate-y-1 transition-transform duration-300">
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold ring-4 ring-white">
@@ -424,8 +478,49 @@ export default function Home() {
       </section>
 
       {/* Features Grid */}
-      <section id="features" className="py-32 px-6 relative z-10">
-        <div className="max-w-7xl mx-auto">
+      <section id="features" className="py-32 px-6 relative ">
+        {/* Connector Line from Stats (Top) to Features (Bottom) */}
+        <div className="hidden lg:block absolute inset-0 max-w-7xl mx-auto pointer-events-none overflow-visible">
+          <svg
+            className="w-full h-full overflow-visible"
+            viewBox="0 0 1200 800"
+            fill="none"
+            preserveAspectRatio="none"
+          >
+            <defs>
+              <linearGradient
+                id="connector-gradient"
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1"
+              >
+                <stop offset="0%" stopColor="#ef4444" stopOpacity="0" />
+                <stop offset="20%" stopColor="#ef4444" stopOpacity="0.4" />
+                <stop offset="80%" stopColor="#ef4444" stopOpacity="0.4" />
+                <stop offset="100%" stopColor="#ef4444" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            {/* Path: Starts above (from Stats), goes down, jogs right, connects to Feature 1 */}
+            <path
+              d="M 150 -100 V 200 C 150 250, 200 250, 200 300 V 450"
+              stroke="#ef4444"
+              strokeWidth="3"
+              strokeDasharray="12 12"
+              className="opacity-40"
+            />
+            {/* Moving particle */}
+            <circle r="5" fill="#ef4444" className="opacity-60">
+              <animateMotion
+                dur="4s"
+                repeatCount="indefinite"
+                path="M 150 -100 V 200 C 150 250, 200 250, 200 300 V 450"
+              />
+            </circle>
+          </svg>
+        </div>
+
+        <div className="max-w-7xl mx-auto relative z-10">
           <div className="mb-20 text-center max-w-3xl mx-auto">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900 tracking-tight">
               Designed for Speed. <br />
@@ -532,6 +627,98 @@ export default function Home() {
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Connector: Features -> Workflow */}
+          <div className="hidden lg:block absolute top-[100%] left-0 right-0 h-[400px] w-full pointer-events-none z-0 overflow-visible">
+            <svg
+              className="w-full h-full overflow-visible"
+              viewBox="0 0 1200 400"
+              fill="none"
+              preserveAspectRatio="none"
+            >
+              <defs>
+                <marker
+                  id="arrowhead-down"
+                  markerWidth="10"
+                  markerHeight="7"
+                  refX="5"
+                  refY="3.5"
+                  orient="auto"
+                >
+                  <polygon
+                    points="0 0, 10 3.5, 0 7"
+                    fill="#ef4444"
+                    className="opacity-60"
+                  />
+                </marker>
+              </defs>
+
+              {/* Left Path: Down then Right to Center */}
+              <path
+                d="M 200 -20 V 60 Q 200 80 220 80 H 600"
+                stroke="#ef4444"
+                strokeWidth="3"
+                strokeDasharray="12 12"
+                className="opacity-40"
+              />
+
+              {/* Right Path: Down then Left to Center */}
+              <path
+                d="M 1000 -20 V 60 Q 1000 80 980 80 H 600"
+                stroke="#ef4444"
+                strokeWidth="3"
+                strokeDasharray="12 12"
+                className="opacity-40"
+              />
+
+              {/* Middle Path: Down to Center Intersection */}
+              <path
+                d="M 600 -20 V 80"
+                stroke="#ef4444"
+                strokeWidth="3"
+                strokeDasharray="12 12"
+                className="opacity-40"
+              />
+
+              {/* Output Path: Center Intersection -> Curve Left -> Down to Card */}
+              <path
+                d="M 600 80 V 120 Q 600 140 580 140 H 320 Q 300 140 300 160 V 380"
+                stroke="#ef4444"
+                strokeWidth="3"
+                strokeDasharray="12 12"
+                className="opacity-40"
+                markerEnd="url(#arrowhead-down)"
+              />
+
+              {/* Animated Particles */}
+              {/* Particle 1: Left -> Center -> Output */}
+              <circle r="5" fill="#ef4444" className="opacity-60">
+                <animateMotion
+                  dur="4s"
+                  repeatCount="indefinite"
+                  path="M 200 -20 V 60 Q 200 80 220 80 H 600 V 120 Q 600 140 580 140 H 320 Q 300 140 300 160 V 380"
+                />
+              </circle>
+              {/* Particle 2: Right -> Center -> Output */}
+              <circle r="5" fill="#ef4444" className="opacity-60">
+                <animateMotion
+                  dur="4s"
+                  repeatCount="indefinite"
+                  path="M 1000 -20 V 60 Q 1000 80 980 80 H 600 V 120 Q 600 140 580 140 H 320 Q 300 140 300 160 V 380"
+                  begin="2s"
+                />
+              </circle>
+              {/* Particle 3: Middle -> Center -> Output */}
+              <circle r="5" fill="#ef4444" className="opacity-60">
+                <animateMotion
+                  dur="4s"
+                  repeatCount="indefinite"
+                  path="M 600 -20 V 120 Q 600 140 580 140 H 320 Q 300 140 300 160 V 380"
+                  begin="1s"
+                />
+              </circle>
+            </svg>
           </div>
         </div>
       </section>
@@ -714,23 +901,69 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 px-6 relative overflow-hidden z-10">
-        <div className="max-w-5xl mx-auto text-center relative z-10 glass-card p-12 bg-gradient-to-br from-white to-gray-50">
-          <h2 className="text-4xl md:text-6xl font-bold mb-6 text-gray-900 tracking-tight">
+      <section className="py-24 px-6 relative z-10">
+        {/* Connector: Workflow -> CTA */}
+        <div className="hidden lg:block absolute -top-[220px] left-0 right-0 h-[350px] w-full pointer-events-none z-0 overflow-visible">
+          <svg
+            className="w-full h-full overflow-visible"
+            viewBox="0 0 1200 350"
+            fill="none"
+            preserveAspectRatio="none"
+          >
+            <defs>
+              <marker
+                id="arrowhead-cta"
+                markerWidth="10"
+                markerHeight="7"
+                refX="5"
+                refY="3.5"
+                orient="auto"
+              >
+                <polygon
+                  points="0 0, 10 3.5, 0 7"
+                  fill="#ef4444"
+                  className="opacity-60"
+                />
+              </marker>
+            </defs>
+
+            {/* Path: Left Column (Visual) -> Center (CTA) */}
+            {/* Starts high (y=50) inside the -220px container, drops to 300 */}
+            <path
+              d="M 300 50 V 200 Q 300 220 320 220 H 580 Q 600 220 600 240 V 300"
+              stroke="#ef4444"
+              strokeWidth="3"
+              strokeDasharray="12 12"
+              className="opacity-40"
+              markerEnd="url(#arrowhead-cta)"
+            />
+
+            {/* Animated Particle */}
+            <circle r="5" fill="#ef4444" className="opacity-60">
+              <animateMotion
+                dur="4s"
+                repeatCount="indefinite"
+                path="M 300 50 V 200 Q 300 220 320 220 H 580 Q 600 220 600 240 V 300"
+              />
+            </circle>
+          </svg>
+        </div>
+        <div className="max-w-5xl mx-auto text-center relative z-10 glass-card p-12 bg-gradient-to-br from-red-600 to-red-700 border-red-500/30">
+          <h2 className="text-4xl md:text-6xl font-bold mb-6 text-white tracking-tight">
             Ready to automate?
           </h2>
-          <p className="text-xl text-gray-500 mb-10 max-w-2xl mx-auto">
+          <p className="text-xl text-red-100 mb-10 max-w-2xl mx-auto font-medium">
             Join thousands of developers building the next generation of AI
-            tools.
+            tools using the Model Context Protocol.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <input
               type="email"
               placeholder="Enter your email"
-              className="w-full sm:w-80 px-6 py-4 rounded-xl bg-gray-100 border border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-all font-medium"
+              className="w-full sm:w-80 px-6 py-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder-red-200 focus:outline-none focus:ring-2 focus:ring-white/30 transition-all font-medium backdrop-blur-md"
             />
-            <button className="w-full sm:w-auto px-8 py-4 rounded-xl bg-gray-900 text-white font-bold hover:bg-black hover:-translate-y-1 transition-all shadow-lg">
+            <button className="w-full sm:w-auto px-8 py-4 rounded-xl bg-white text-red-600 font-bold hover:bg-red-50 hover:-translate-y-1 transition-all shadow-xl shadow-black/10">
               Get Early Access
             </button>
           </div>
