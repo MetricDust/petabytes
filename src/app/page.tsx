@@ -1,6 +1,8 @@
 /* eslint-disable react/jsx-no-comment-textnodes */
 "use client";
 
+const basePath = process.env.NODE_ENV === "production" ? "/petabytes" : "";
+
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import {
@@ -545,7 +547,7 @@ export default function Home() {
                 icon: Globe,
                 visual: (
                   <Image
-                    src="/images/feat1.png"
+                    src={`${basePath}/images/feat1.png`}
                     alt="HTTP to MCP Interface"
                     fill
                     className="object-contain"
@@ -559,7 +561,7 @@ export default function Home() {
                 icon: Terminal,
                 visual: (
                   <Image
-                    src="/images/feat2.png"
+                    src={`${basePath}/images/feat2.png`}
                     alt="Live Testing Console"
                     fill
                     className="object-contain"
@@ -573,7 +575,7 @@ export default function Home() {
                 icon: Box,
                 visual: (
                   <Image
-                    src="/images/feat3.png"
+                    src={`${basePath}/images/feat3.png`}
                     alt="Deployment Dashboard"
                     fill
                     className="object-contain"
