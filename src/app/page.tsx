@@ -191,13 +191,13 @@ export default function Home() {
               not hours. Just paste your URL.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <button className="px-8 py-4 rounded-2xl bg-red-600 hover:bg-red-500 text-white font-bold shadow-xl shadow-red-500/20 hover:shadow-red-500/40 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2">
-                <Zap className="w-5 h-5 fill-current" />
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
+              <button className="px-6 py-3 sm:px-8 sm:py-4 rounded-2xl bg-red-600 hover:bg-red-500 text-white text-sm sm:text-base font-bold shadow-xl shadow-red-500/20 hover:shadow-red-500/40 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2">
+                <Zap className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
                 Start Building Free
               </button>
-              <button className="px-8 py-4 rounded-2xl bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 font-semibold shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2">
-                <Play className="w-5 h-5 fill-current text-gray-400" />
+              <button className="px-6 py-3 sm:px-8 sm:py-4 rounded-2xl bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 text-sm sm:text-base font-semibold shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2">
+                <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-current text-gray-400" />
                 Watch Demo
               </button>
             </div>
@@ -205,61 +205,63 @@ export default function Home() {
 
           {/* Vision Pro Style Card UI - Dynamic Workflow */}
           <div className="relative perspective-1000">
-            {/* Decorative Blobs */}
-            <div className="absolute top-10 right-10 w-64 h-64 bg-red-500/20 rounded-full blur-3xl -z-10 mix-blend-multiply animate-pulse-soft" />
-            <div className="absolute bottom-10 left-10 w-64 h-64 bg-gray-300/20 rounded-full blur-3xl -z-10 mix-blend-multiply" />
+            {/* Decorative Blobs - Responsive sizing */}
+            <div className="absolute top-4 sm:top-10 right-4 sm:right-10 w-40 h-40 sm:w-64 sm:h-64 bg-red-500/20 rounded-full blur-3xl -z-10 mix-blend-multiply animate-pulse-soft" />
+            <div className="absolute bottom-4 sm:bottom-10 left-4 sm:left-10 w-40 h-40 sm:w-64 sm:h-64 bg-gray-300/20 rounded-full blur-3xl -z-10 mix-blend-multiply" />
 
             {/* Main Glass Panel */}
-            <div className="glass-card p-8 animate-float">
+            <div className="glass-card p-4 sm:p-6 md:p-8 animate-float">
               {/* Header */}
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-lg shadow-red-500/30 text-white">
-                    <Zap className="w-5 h-5" />
+              <div className="flex items-center justify-between mb-6 sm:mb-8">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-lg shadow-red-500/30 text-white">
+                    <Zap className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
                   <div>
-                    <div className="text-sm font-bold text-gray-900">
+                    <div className="text-xs sm:text-sm font-bold text-gray-900">
                       Auto-Recall Engine
                     </div>
-                    <div className="text-xs text-gray-500">Live Simulation</div>
+                    <div className="text-[10px] sm:text-xs text-gray-500">
+                      Live Simulation
+                    </div>
                   </div>
                 </div>
                 <div className="flex gap-1">
                   {[0, 1, 2].map((i) => (
                     <div
                       key={i}
-                      className={`w-2 h-2 rounded-full transition-all duration-300 ${activeStep === i || (activeStep === 3 && i === 2) ? "bg-red-500 scale-125" : "bg-gray-300"}`}
+                      className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-all duration-300 ${activeStep === i || (activeStep === 3 && i === 2) ? "bg-red-500 scale-125" : "bg-gray-300"}`}
                     />
                   ))}
                 </div>
               </div>
 
               {/* Steps Container */}
-              <div className="relative space-y-4">
+              <div className="relative space-y-3 sm:space-y-4">
                 {/* Step 1: Input */}
                 <div
-                  className={`transition-all duration-500 border rounded-2xl p-4 flex items-center gap-4 ${activeStep === 0 ? "bg-white shadow-lg border-red-200 scale-105" : "bg-white/40 border-gray-100 opacity-60"}`}
+                  className={`transition-all duration-500 border rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center gap-2 sm:gap-4 ${activeStep === 0 ? "bg-white shadow-lg border-red-200 scale-105" : "bg-white/40 border-gray-100 opacity-60"}`}
                 >
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${activeStep === 0 ? "bg-red-100 text-red-600" : "bg-gray-100 text-gray-400"}`}
+                    className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0 ${activeStep === 0 ? "bg-red-100 text-red-600" : "bg-gray-100 text-gray-400"}`}
                   >
-                    <Globe className="w-5 h-5" />
+                    <Globe className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">
+                    <div className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">
                       Input Source
                     </div>
-                    <div className="font-mono text-sm text-gray-600 truncate bg-gray-50 px-2 py-1 rounded">
+                    <div className="font-mono text-xs sm:text-sm text-gray-600 truncate bg-gray-50 px-2 py-1 rounded">
                       https://api.store.com/v2/products
                     </div>
                   </div>
                   {activeStep === 0 && (
-                    <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500 animate-pulse flex-shrink-0" />
                   )}
                 </div>
 
                 {/* Connecting Line 1 */}
-                <div className="h-4 flex justify-center">
+                <div className="h-3 sm:h-4 flex justify-center">
                   <div
                     className={`w-0.5 h-full transition-colors duration-300 ${activeStep >= 1 ? "bg-red-300" : "bg-gray-200"}`}
                   />
@@ -267,20 +269,20 @@ export default function Home() {
 
                 {/* Step 2: Processing */}
                 <div
-                  className={`transition-all duration-500 border rounded-2xl p-4 flex items-center gap-4 ${activeStep === 1 ? "bg-white shadow-lg border-red-200 scale-105" : "bg-white/40 border-gray-100 opacity-60"}`}
+                  className={`transition-all duration-500 border rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center gap-2 sm:gap-4 ${activeStep === 1 ? "bg-white shadow-lg border-red-200 scale-105" : "bg-white/40 border-gray-100 opacity-60"}`}
                 >
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${activeStep === 1 ? "bg-red-100 text-red-600" : "bg-gray-100 text-gray-400"}`}
+                    className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0 ${activeStep === 1 ? "bg-red-100 text-red-600" : "bg-gray-100 text-gray-400"}`}
                   >
                     <Activity
-                      className={`w-5 h-5 ${activeStep === 1 ? "animate-spin" : ""}`}
+                      className={`w-4 h-4 sm:w-5 sm:h-5 ${activeStep === 1 ? "animate-spin" : ""}`}
                     />
                   </div>
                   <div className="flex-1">
-                    <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">
+                    <div className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">
                       Processing
                     </div>
-                    <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-1.5 sm:h-2 w-full bg-gray-100 rounded-full overflow-hidden">
                       <div
                         className={`h-full bg-red-500 transition-all duration-[3000ms] ease-linear ${activeStep === 1 ? "w-full" : "w-0"}`}
                       />
@@ -289,7 +291,7 @@ export default function Home() {
                 </div>
 
                 {/* Connecting Line 2 */}
-                <div className="h-4 flex justify-center">
+                <div className="h-3 sm:h-4 flex justify-center">
                   <div
                     className={`w-0.5 h-full transition-colors duration-300 ${activeStep >= 2 ? "bg-red-300" : "bg-gray-200"}`}
                   />
@@ -297,32 +299,32 @@ export default function Home() {
 
                 {/* Step 3: MCP Output */}
                 <div
-                  className={`transition-all duration-500 border rounded-2xl p-4 flex items-center gap-4 ${activeStep >= 2 ? "bg-gradient-to-tr from-white to-red-50 shadow-xl border-red-200 scale-105 ring-1 ring-red-100" : "bg-white/40 border-gray-100 opacity-60"}`}
+                  className={`transition-all duration-500 border rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center gap-2 sm:gap-4 ${activeStep >= 2 ? "bg-gradient-to-tr from-white to-red-50 shadow-xl border-red-200 scale-105 ring-1 ring-red-100" : "bg-white/40 border-gray-100 opacity-60"}`}
                 >
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${activeStep >= 2 ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400"}`}
+                    className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0 ${activeStep >= 2 ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400"}`}
                   >
-                    <Server className="w-5 h-5" />
+                    <Server className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
-                  <div className="flex-1">
-                    <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">
                       Generated Server
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span
-                        className={`text-sm font-bold ${activeStep >= 2 ? "text-gray-900" : "text-gray-400"}`}
+                        className={`text-xs sm:text-sm font-bold truncate ${activeStep >= 2 ? "text-gray-900" : "text-gray-400"}`}
                       >
                         petabytes-mcp:latest
                       </span>
                       {activeStep >= 2 && (
-                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-700">
+                        <span className="px-1.5 py-0.5 rounded text-[9px] sm:text-[10px] font-bold bg-green-100 text-green-700 whitespace-nowrap">
                           READY
                         </span>
                       )}
                     </div>
                   </div>
                   {activeStep >= 2 && (
-                    <CheckCircle className="w-5 h-5 text-green-500" />
+                    <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
                   )}
                 </div>
               </div>
@@ -534,7 +536,7 @@ export default function Home() {
 
           {/* Dynamic Expanding Features - Wireframe Implementation */}
           {/* Dynamic Expanding Features - Wireframe Implementation */}
-          <div className="flex flex-col lg:flex-row gap-4 h-auto lg:h-[400px] transition-all">
+          <div className="flex flex-col md:flex-row gap-4 h-auto md:h-[400px] transition-all">
             {[
               {
                 id: 1,
@@ -581,38 +583,63 @@ export default function Home() {
             ].map((feature, i) => (
               <div
                 key={feature.id}
-                className="group relative flex-1 hover:flex-[3] transition-[flex-grow] duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)] min-h-[240px] lg:min-h-full cursor-pointer z-0"
+                className="group relative flex-1 md:hover:flex-[3] transition-[flex-grow] duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)] min-h-[380px] md:min-h-full cursor-pointer z-0"
               >
-                {/* Connector Line (visible on desktop) */}
+                {/* Connector Line (visible on tablet and desktop) */}
                 {i < 2 && (
-                  <div className="hidden lg:block absolute -right-5 top-1/2 -translate-y-1/2 w-6 border-t-2 border-dashed border-gray-400/50 z-[-1]" />
+                  <div className="hidden md:block absolute -right-5 top-1/2 -translate-y-1/2 w-6 border-t-2 border-dashed border-gray-400/50 z-[-1]" />
                 )}
 
                 {/* Card Container (Inner) */}
-                <div className="w-full h-full relative overflow-hidden rounded-[2.5rem] border border-white/20 shadow-xl">
-                  {/* Main Background (Red Gradient - Visible initially) */}
+                <div className="w-full h-full relative overflow-hidden rounded-2xl md:rounded-[2.5rem] border border-white/20 shadow-xl">
+                  {/* Main Background (Red Gradient) */}
                   <div className="absolute inset-0 bg-gradient-to-br from-red-600 to-red-700 opacity-100 transition-colors duration-500" />
 
-                  {/* Inner Flex Container - Creates the 'Split Card' layout */}
-                  <div className="absolute inset-0 flex p-3 gap-3">
+                  {/* MOBILE LAYOUT: Vertical Stack with Always-Visible Image */}
+                  <div className="md:hidden relative h-full flex flex-col p-4 gap-4 z-10">
+                    {/* Image - Always visible on mobile */}
+                    <div className="w-full h-40 relative overflow-hidden rounded-xl bg-white/5 backdrop-blur-sm flex-shrink-0">
+                      {feature.visual}
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 flex flex-col justify-between">
+                      <div>
+                        <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center mb-4 text-white shadow-lg">
+                          <feature.icon className="w-6 h-6" />
+                        </div>
+
+                        <h3 className="text-xl font-bold mb-2 text-white">
+                          {feature.title}
+                        </h3>
+
+                        <p className="text-sm font-medium leading-relaxed text-white/90">
+                          {feature.desc}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* TABLET & DESKTOP LAYOUT: Original Expanding Animation */}
+                  <div className="hidden md:flex absolute inset-0 p-3 gap-3">
                     {/* Left Side: Visual/Image Card (Reveals on Hover) */}
-                    <div className="hidden lg:block w-0 group-hover:w-1/2 transition-[width] duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)] relative overflow-hidden rounded-[2rem]">
+                    <div className="w-0 group-hover:w-1/2 transition-[width] duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)] relative overflow-hidden rounded-[2rem]">
                       {feature.visual}
                     </div>
 
                     {/* Right Side: Content Card (Transitions to White on Hover) */}
-                    <div className="flex-1 rounded-[2rem] p-8 flex flex-col justify-between relative z-10 transition-all duration-500 group-hover:bg-white group-hover:shadow-2xl">
+                    <div className="flex-1 rounded-[2rem] p-6 lg:p-8 flex flex-col justify-between relative z-10 transition-all duration-500 group-hover:bg-white group-hover:shadow-2xl">
                       <div>
                         {/* Icon: Transitions from Glass to Red on White Background */}
                         <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center mb-6 text-white shadow-lg group-hover:bg-red-50 group-hover:border-red-100 group-hover:text-red-600 transition-all duration-500">
                           <feature.icon className="w-6 h-6" />
                         </div>
 
-                        <h3 className="text-2xl font-bold mb-3 whitespace-nowrap transition-colors duration-500 text-white group-hover:text-gray-900">
+                        <h3 className="text-xl lg:text-2xl font-bold mb-3 whitespace-nowrap transition-colors duration-500 text-white group-hover:text-gray-900">
                           {feature.title}
                         </h3>
 
-                        <p className="text-sm md:text-base font-medium leading-relaxed max-w-md transition-colors duration-500 text-white/80 group-hover:text-gray-500">
+                        <p className="text-sm lg:text-base font-medium leading-relaxed max-w-md transition-colors duration-500 text-white/80 group-hover:text-gray-500">
                           {feature.desc}
                         </p>
                       </div>
