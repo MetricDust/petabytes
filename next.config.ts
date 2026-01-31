@@ -1,12 +1,17 @@
 import type { NextConfig } from "next";
 
+// Use basePath only for GitHub Pages deployment, not for local dev
+const isProduction = process.env.NODE_ENV === "production";
+
 const nextConfig: NextConfig = {
   output: "export",
   images: {
     unoptimized: true,
   },
-  basePath: "/petabytes",
-  assetPrefix: "/petabytes",
+  ...(isProduction && {
+    basePath: "/petabytes",
+    assetPrefix: "/petabytes",
+  }),
 };
 
 export default nextConfig;
