@@ -171,7 +171,17 @@ export default function Home() {
       </div>
 
       {/* Hero Section */}
-      <section className="relative z-10 pt-48 pb-24 px-6">
+      <section className="relative z-10 pt-48 pb-24 px-6 overflow-hidden">
+        {/* Abstract Wave Background Image */}
+        <div className="absolute inset-0 w-full h-full -z-10 pointer-events-none overflow-hidden">
+          <Image
+            src={`${basePath}/abstract-wave.png`}
+            alt="Abstract Wave Background"
+            fill
+            className="object-cover object-center blur"
+            priority
+          />
+        </div>
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
           {/* Hero Content */}
           <div className="space-y-8 relative z-10">
