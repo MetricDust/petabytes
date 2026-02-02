@@ -1,1039 +1,951 @@
-/* eslint-disable react/jsx-no-comment-textnodes */
 "use client";
 
-const basePath = process.env.NODE_ENV === "production" ? "/petabytes" : "";
-
 import React, { useState, useEffect, useRef } from "react";
-import Image from "next/image";
+import * as THREE from "three";
 import {
-  Play,
-  Code,
+  motion,
+  AnimatePresence,
+  useTransform,
+  useMotionValue,
+  useSpring,
+  Variants,
+} from "framer-motion";
+import {
   Zap,
-  ChevronRight,
-  CheckCircle,
-  Activity,
-  Globe,
-  Box,
-  Terminal,
+  Shield,
   Cpu,
-  Layers,
   ArrowRight,
+  Terminal,
+  Layers,
+  Search,
+  Lock,
+  CheckCircle2,
+  HelpCircle,
   Server,
+  LayoutDashboard,
+  Database,
 } from "lucide-react";
 
-export default function Home() {
-  const [activeStep, setActiveStep] = useState(0);
-  const [hoveredWorkflowStep, setHoveredWorkflowStep] = useState(0);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const workflowRef = useRef<HTMLElement>(null);
+/* ----------------------------------------------------------------------
+   GLSL SHADERS (Audio Visualizer) - Tuned for Light Mode
+   ----------------------------------------------------------------------
+*/
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!workflowRef.current) return;
-    const rect = workflowRef.current.getBoundingClientRect();
-    setMousePos({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    });
-  };
+const vertexShader = `
+uniform float uTime;
+uniform float uBass;
+uniform float uMid;
+uniform float uTreble;
+uniform vec3 uColorInner;
+uniform vec3 uColorOuter;
+uniform float uPixelRatio;
 
-  // Scroll Logic for Workflow
+attribute float aSize;
+attribute float aAngle;
+attribute float aRadius;
+attribute float aSpeed;
+attribute float aRandom;
+
+varying vec3 vColor;
+varying float vAlpha;
+
+vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+
+float snoise(vec3 v) {
+  const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;
+  const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);
+  vec3 i  = floor(v + dot(v, C.yyy) );
+  vec3 x0 = v - i + dot(i, C.xxx) ;
+  vec3 g = step(x0.yzx, x0.xyz);
+  vec3 l = 1.0 - g;
+  vec3 i1 = min( g.xyz, l.zxy );
+  vec3 i2 = max( g.xyz, l.zxy );
+  vec3 x1 = x0 - i1 + C.xxx;
+  vec3 x2 = x0 - i2 + C.yyy;
+  vec3 x3 = x0 - D.yyy;
+  i = mod289(i);
+  vec4 p = permute( permute( permute(
+             i.z + vec4(0.0, i1.z, i2.z, 1.0 ))
+           + i.y + vec4(0.0, i1.y, i2.y, 1.0 ))
+           + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
+  float n_ = 0.142857142857;
+  vec3  ns = n_ * D.wyz - D.xzx;
+  vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+  vec4 x_ = floor(j * ns.z);
+  vec4 y_ = floor(j - 7.0 * x_ );
+  vec4 x = x_ *ns.x + ns.yyyy;
+  vec4 y = y_ *ns.x + ns.yyyy;
+  vec4 h = 1.0 - abs(x) - abs(y);
+  vec4 b0 = vec4( x.xy, y.xy );
+  vec4 b1 = vec4( x.zw, y.zw );
+  vec4 s0 = floor(b0)*2.0 + 1.0;
+  vec4 s1 = floor(b1)*2.0 + 1.0;
+  vec4 sh = -step(h, vec4(0.0));
+  vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy ;
+  vec4 a1 = b1.xzyw + s1.zzww*sh.zzww ;
+  vec3 p0 = vec3(a0.xy,h.x);
+  vec3 p1 = vec3(a0.zw,h.y);
+  vec3 p2 = vec3(a1.xy,h.z);
+  vec3 p3 = vec3(a1.zw,h.w);
+  vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
+  p0 *= norm.x;
+  p1 *= norm.y;
+  p2 *= norm.z;
+  p3 *= norm.w;
+  vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+  m = m * m;
+  return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3) ) );
+}
+
+void main() {
+    float currentAngle = aAngle + (uTime * aSpeed * 0.2);
+    float audioExpansion = uBass * 4.0 * smoothstep(0.0, 1.0, aRandom); 
+    float finalRadius = aRadius + audioExpansion;
+    
+    vec3 noisePos = vec3(
+        cos(currentAngle) * finalRadius * 0.5,
+        sin(currentAngle) * finalRadius * 0.5,
+        uTime * 0.5
+    );
+    float turbulence = snoise(noisePos) * (1.0 + uTreble * 3.0);
+    
+    vec3 pos = vec3(0.0);
+    pos.x = cos(currentAngle) * (finalRadius + turbulence);
+    pos.y = sin(currentAngle) * (finalRadius + turbulence);
+    pos.z = (turbulence * 2.0) + (aRandom - 0.5) * (1.0 + uMid * 5.0);
+
+    vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+    gl_Position = projectionMatrix * mvPosition;
+    gl_PointSize = (aSize * uPixelRatio) * (45.0 / -mvPosition.z);
+    
+    float mixFactor = smoothstep(5.0, 15.0, finalRadius);
+    vColor = mix(uColorInner, uColorOuter, mixFactor);
+    
+    vAlpha = 1.0 - smoothstep(12.0, 22.0, finalRadius);
+}
+`;
+
+const fragmentShader = `
+uniform sampler2D uTexture;
+varying vec3 vColor;
+varying float vAlpha;
+
+void main() {
+    vec2 coord = gl_PointCoord - vec2(0.5);
+    float dist = length(coord);
+    float strength = 1.0 - smoothstep(0.3, 0.5, dist);
+    if (strength < 0.01) discard;
+    gl_FragColor = vec4(vColor, vAlpha * strength);
+}
+`;
+
+/* ----------------------------------------------------------------------
+   ANIMATION VARIANTS
+   ----------------------------------------------------------------------
+*/
+
+const sectionFadeVariants: Variants = {
+  hidden: { opacity: 0, y: 40, filter: "blur(10px)" },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: {
+      duration: 1.2,
+      ease: [0.22, 1, 0.36, 1],
+    },
+  },
+};
+
+const directionalVariants: Variants = {
+  hidden: (i: number) => {
+    if (i === 0) return { opacity: 0, x: -100, filter: "blur(10px)" };
+    if (i === 1) return { opacity: 0, y: -100, filter: "blur(10px)" };
+    if (i === 2) return { opacity: 0, y: 100, filter: "blur(10px)" };
+    if (i === 3) return { opacity: 0, x: 100, filter: "blur(10px)" };
+    return { opacity: 0, scale: 0.8 };
+  },
+  visible: (i: number) => ({
+    opacity: 1,
+    x: 0,
+    y: 0,
+    scale: 1,
+    filter: "blur(0px)",
+    transition: {
+      type: "spring",
+      stiffness: 70,
+      damping: 20,
+      delay: i * 0.1,
+      duration: 1.2,
+    },
+  }),
+};
+
+/* ----------------------------------------------------------------------
+   SUB-COMPONENTS
+   ----------------------------------------------------------------------
+*/
+
+const GlassCard = ({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) => {
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [2, -2]), {
+    stiffness: 100,
+    damping: 25,
+  });
+  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-2, 2]), {
+    stiffness: 100,
+    damping: 25,
+  });
+
+  function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    mouseX.set(x);
+    mouseY.set(y);
+  }
+
+  return (
+    <motion.div
+      style={{ rotateX, rotateY, perspective: 1200 }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={() => {
+        mouseX.set(0);
+        mouseY.set(0);
+      }}
+      className={`relative group backdrop-blur-3xl bg-white/60 border border-slate-200/50 rounded-[2.5rem] shadow-[0_40px_80px_rgba(0,0,0,0.1)] overflow-hidden ${className}`}
+    >
+      <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+      <div className="relative z-10">{children}</div>
+    </motion.div>
+  );
+};
+
+const FeatureCard = ({
+  icon,
+  title,
+  description,
+  index,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  index: number;
+}) => (
+  <motion.div
+    custom={index}
+    variants={directionalVariants}
+    initial="hidden"
+    whileInView="visible"
+    viewport={{ once: false, amount: 0.1 }}
+    className="group h-full"
+  >
+    <div
+      className={`relative h-full p-10 backdrop-blur-3xl bg-white/70 border border-slate-200/60 rounded-[2rem] overflow-hidden transition-all duration-700 hover:border-red-500/30 hover:shadow-xl`}
+    >
+      <div className="relative z-10">
+        <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center mb-6 border border-slate-100 group-hover:bg-red-50 transition-all">
+          {React.isValidElement(icon)
+            ? React.cloneElement(
+                icon as React.ReactElement<{
+                  size?: number;
+                  className?: string;
+                }>,
+                {
+                  size: 22,
+                  className: "text-slate-600 group-hover:text-red-600",
+                },
+              )
+            : null}
+        </div>
+        <h3 className="text-xl font-bold mb-3 text-slate-900 leading-none">
+          {title}
+        </h3>
+        <p className="text-slate-500 text-sm leading-relaxed">{description}</p>
+      </div>
+    </div>
+  </motion.div>
+);
+
+const PlatformComponent = ({
+  title,
+  items,
+}: {
+  title: string;
+  items: string[];
+}) => (
+  <div className="p-8 border-r last:border-none border-slate-100 flex flex-col gap-4">
+    <h4 className="text-lg font-black text-red-600 uppercase tracking-tighter italic">
+      {title}
+    </h4>
+    <ul className="space-y-3">
+      {items.map((item, i) => (
+        <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
+          <CheckCircle2 size={16} className="text-red-500 mt-0.5 shrink-0" />
+          <span>{item}</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+);
+
+const GlowingButton = ({
+  children,
+  primary = false,
+  onClick,
+}: {
+  children: React.ReactNode;
+  primary?: boolean;
+  onClick?: () => void;
+}) => (
+  <motion.button
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+    onClick={onClick}
+    className={`relative px-10 py-4 rounded-xl font-bold uppercase tracking-widest text-[10px] transition-all duration-500 overflow-hidden ${
+      primary
+        ? "text-white shadow-[0_15px_30px_rgba(220,38,38,0.3)]"
+        : "text-slate-600 border border-slate-200 bg-white"
+    }`}
+  >
+    {primary && <div className="absolute inset-0 bg-red-600" />}
+    <span className="relative z-10">{children}</span>
+  </motion.button>
+);
+
+/* ----------------------------------------------------------------------
+   BACKGROUND VISUALIZER COMPONENT
+   ----------------------------------------------------------------------
+*/
+
+const BackgroundVisualizer = () => {
+  const mountRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const handleScroll = () => {
-      if (!workflowRef.current) return;
-      const rect = workflowRef.current.getBoundingClientRect();
-      const sectionHeight = rect.height;
-      const viewportHeight = window.innerHeight;
+    if (!mountRef.current) return;
+    const width = window.innerWidth,
+      height = window.innerHeight;
+    const scene = new THREE.Scene(),
+      camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+    camera.position.z = 20;
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(width, height);
+    mountRef.current.appendChild(renderer.domElement);
 
-      // Calculate progress: 0 when entering, 1 when finished scrolling the section
-      const scrollDist = -rect.top;
-      const totalScrollable = sectionHeight - viewportHeight;
+    const particlesCount = 20000;
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(particlesCount * 3),
+      sizes = new Float32Array(particlesCount);
+    const angles = new Float32Array(particlesCount),
+      radii = new Float32Array(particlesCount);
+    const speeds = new Float32Array(particlesCount),
+      randoms = new Float32Array(particlesCount);
 
-      if (scrollDist < 0) return; // Before section
+    for (let i = 0; i < particlesCount; i++) {
+      const r = 1.5 + Math.random() * 10.0,
+        theta = Math.random() * Math.PI * 2;
+      sizes[i] = Math.random() * 2.0 + 0.5;
+      angles[i] = theta;
+      radii[i] = r;
+      speeds[i] = (1.2 / r) * 3.0;
+      randoms[i] = Math.random();
+    }
+    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute("aSize", new THREE.BufferAttribute(sizes, 1));
+    geometry.setAttribute("aAngle", new THREE.BufferAttribute(angles, 1));
+    geometry.setAttribute("aRadius", new THREE.BufferAttribute(radii, 1));
+    geometry.setAttribute("aSpeed", new THREE.BufferAttribute(speeds, 1));
+    geometry.setAttribute("aRandom", new THREE.BufferAttribute(randoms, 1));
 
-      if (scrollDist > totalScrollable) {
-        if (hoveredWorkflowStep !== 2) setHoveredWorkflowStep(2);
-        return;
-      }
+    const material = new THREE.ShaderMaterial({
+      vertexShader,
+      fragmentShader,
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.NormalBlending,
+      uniforms: {
+        uTime: { value: 0 },
+        uBass: { value: 0 },
+        uMid: { value: 0 },
+        uTreble: { value: 0 },
+        uColorInner: { value: new THREE.Color("#dc2626") },
+        uColorOuter: { value: new THREE.Color("#cbd5e1") },
+        uPixelRatio: { value: window.devicePixelRatio },
+      },
+    });
+    const particles = new THREE.Points(geometry, material);
+    scene.add(particles);
 
-      const progress = Math.max(0, Math.min(1, scrollDist / totalScrollable));
-      const step = Math.min(2, Math.floor(progress * 3));
-
-      if (hoveredWorkflowStep !== step) {
-        setHoveredWorkflowStep(step);
-      }
+    let animationId: number;
+    const animate = () => {
+      material.uniforms.uTime.value += 0.008;
+      particles.rotation.z += 0.001;
+      renderer.render(scene, camera);
+      animationId = requestAnimationFrame(animate);
     };
+    animate();
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [hoveredWorkflowStep]);
+    const currentRef = mountRef.current;
+    return () => {
+      cancelAnimationFrame(animationId);
+      if (currentRef) currentRef.removeChild(renderer.domElement);
+    };
+  }, []);
+  return (
+    <div
+      ref={mountRef}
+      className="fixed inset-0 z-0 pointer-events-none opacity-60"
+      style={{ filter: "blur(8px)" }}
+    />
+  );
+};
+
+/* ----------------------------------------------------------------------
+   MAIN APP
+   ----------------------------------------------------------------------
+*/
+
+const PIPELINE_STEPS = [
+  {
+    id: "cache",
+    label: "Cache Layer",
+    sub: "LRU + TTL",
+    icon: Database,
+    log: ">> [CACHE] Checking key 'current_weather_sf'...\n>> [CACHE] Status: MISS (0.4ms)\n>> Forwarding to Filter Layer...",
+  },
+  {
+    id: "filter",
+    label: "Filter Layer",
+    sub: "E5 Embeddings",
+    icon: Search,
+    log: ">> [FILTER] Embedding query 'weather in SF'\n>> [VECTOR] Top-k Search (k=10)\n>> [MATCH] Found tool 'get_weather' (Score: 0.94)",
+  },
+  {
+    id: "agent",
+    label: "Agent Layer",
+    sub: "Haystack ReAct",
+    icon: Cpu,
+    log: ">> [AGENT] Thought: User is asking for weather.\n>> [AGENT] Action: Call get_weather(city='San Francisco')\n>> [AGENT] Observation: Pending execution...",
+  },
+  {
+    id: "valid",
+    label: "Validation",
+    sub: "Param Check",
+    icon: Shield,
+    log: ">> [VALIDATOR] Schema Check: { city: string }\n>> [VALIDATOR] Type: 'San Francisco' is String\n>> [VALIDATOR] Status: PASSED",
+  },
+  {
+    id: "resp",
+    label: "Response",
+    sub: "Natural Language",
+    icon: Zap,
+    log: ">> [RESPONSE] Synthesizing natural language answer...\n>> [OUTPUT] 'The current weather in San Francisco is...'\n>> [STREAM] Token stream active.",
+  },
+];
+
+export default function Home() {
+  const [selectedMcp, setSelectedMcp] = useState(0);
+  const [pipelineStep, setPipelineStep] = useState(0);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setActiveStep((prev) => (prev + 1) % 4);
-    }, 3000);
+      setPipelineStep((prev) => (prev + 1) % PIPELINE_STEPS.length);
+    }, 2500);
     return () => clearInterval(timer);
   }, []);
 
+  const MCP_SERVERS = [
+    {
+      id: "mcp-demo",
+      name: "MCP Demo Server",
+      status: "online",
+      endpoint: "http://localhost:7001",
+      type: "Reference Impl",
+      desc: "Basic math & weather tools",
+    },
+    {
+      id: "semantic-tool",
+      name: "FunctionSemantic",
+      status: "online",
+      endpoint: "http://localhost:8000",
+      type: "Orchestrator",
+      desc: "The SuperMcp Brain",
+    },
+    {
+      id: "stripe-agent",
+      name: "Stripe Finance",
+      status: "warning",
+      endpoint: "https://api.stripe.com/v1",
+      type: "Production",
+      desc: "Payment processing bridge",
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-[#E4E7EB] text-gray-800 font-sans selection:bg-red-500/20 selection:text-red-900 relative">
-      {/* Background Lighting/Sheen */}
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        {/* Breathing Top-Left Corner Glow */}
-        <div className="absolute top-[-15%] left-[-15%] w-[60%] h-[60%] bg-gradient-to-br from-red-500/30 to-red-600/5 rounded-full blur-[120px] opacity-70 animate-pulse-soft" />
+    <div className="min-h-screen bg-[#f8f9fa] text-slate-900 selection:bg-red-100 font-sans overflow-x-hidden">
+      <div className="fixed inset-0 bg-gradient-to-br from-white via-slate-50 to-slate-100 pointer-events-none" />
+      <BackgroundVisualizer />
 
-        {/* Top light source */}
-        <div className="absolute top-[-20%] left-[20%] w-[60%] h-[60%] bg-white/40 rounded-full blur-[150px]" />
-        {/* Subtle red ambient glow */}
-        <div className="absolute top-[30%] right-[-10%] w-[40%] h-[40%] bg-red-500/5 rounded-full blur-[120px]" />
-        {/* Bottom cool shadow */}
-        <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-gray-400/10 rounded-full blur-[100px]" />
-      </div>
-
-      {/* Navbar */}
-      <nav className="fixed top-6 left-0 right-0 z-50 flex justify-center w-full px-6">
-        <div className="max-w-5xl w-full glass-pill px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 cursor-pointer group">
-            <div className="p-2 rounded-full bg-red-500/10 group-hover:bg-red-500/20 transition-colors">
-              <Layers className="w-5 h-5 text-red-600" />
+      {/* Dynamic Island */}
+      <div className="fixed top-6 left-0 w-full z-50 flex justify-center px-4">
+        <motion.div
+          layout
+          className="h-14 bg-white/80 backdrop-blur-3xl border border-slate-200 shadow-[0_20px_40px_rgba(0,0,0,0.06)] flex items-center px-6 rounded-full gap-8"
+        >
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center text-white">
+              <Layers size={16} />
             </div>
-            <span className="text-lg font-bold tracking-tight text-gray-900">
-              Peta<span className="text-red-600">bytes</span>
+            <span className="text-[10px] font-black tracking-widest">
+              PETABYTES
             </span>
           </div>
-
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-500">
-            <a
-              href="#features"
-              className="hover:text-red-600 transition-colors"
-            >
-              Features
+          <div className="hidden md:flex gap-6 text-[9px] font-bold uppercase text-slate-500">
+            <a href="#" className="hover:text-red-600 transition-colors">
+              Platform
             </a>
-            <a
-              href="#workflow"
-              className="hover:text-red-600 transition-colors"
-            >
-              Workflow
+            <a href="#" className="hover:text-red-600 transition-colors">
+              Managed Hub
             </a>
-            <a href="#docs" className="hover:text-red-600 transition-colors">
+            <a href="#" className="hover:text-red-600 transition-colors">
               Docs
             </a>
           </div>
-
-          <button className="hidden md:flex items-center gap-2 px-5 py-2 rounded-full bg-black text-white hover:bg-red-600 hover:shadow-lg hover:shadow-red-500/30 transition-all duration-300 text-sm font-medium">
-            <span>Get Started</span>
-            <ChevronRight className="w-4 h-4" />
+          <button className="bg-red-50 text-red-600 px-4 py-1.5 rounded-full text-[8px] font-black uppercase border border-red-100 hover:bg-red-600 hover:text-white transition-all">
+            Launch Console
           </button>
-        </div>
-      </nav>
-
-      {/* Global Workflow Connector (Hero -> Features) */}
-      <div className="absolute top-0 left-0 right-0 h-[1500px] max-w-7xl mx-auto px-6 pointer-events-none z-[5] hidden lg:block overflow-visible">
-        <svg
-          className="w-full h-full overflow-visible"
-          viewBox="0 0 1200 1500"
-          fill="none"
-          preserveAspectRatio="none"
-        >
-          <defs>
-            <marker
-              id="arrowhead"
-              markerWidth="10"
-              markerHeight="7"
-              refX="9"
-              refY="3.5"
-              orient="auto"
-            >
-              <polygon points="0 0, 10 3.5, 0 7" fill="#ef4444" />
-            </marker>
-          </defs>
-
-          {/* The Circuit Path */}
-          <path
-            d="M 950 550 V 675 Q 950 700 925 700 H 140 Q 115 700 115 725 V 1080"
-            stroke="#ef4444"
-            strokeWidth="3"
-            strokeDasharray="12 12"
-            strokeLinecap="round"
-            fill="none"
-            markerEnd="url(#arrowhead)"
-            className="opacity-40"
-          />
-
-          {/* Animated Pulse along the path */}
-          <circle r="5" fill="#ef4444" className="opacity-60">
-            <animateMotion
-              dur="4s"
-              repeatCount="indefinite"
-              path="M 950 550 V 675 Q 950 700 925 700 H 140 Q 115 700 115 725 V 1080"
-            />
-          </circle>
-        </svg>
+        </motion.div>
       </div>
 
-      {/* Hero Section */}
-      <section className="relative z-10 pt-48 pb-24 px-6 overflow-hidden">
-        {/* Abstract Wave Background Image */}
-        <div className="absolute inset-0 w-full h-full -z-10 pointer-events-none overflow-hidden">
-          <Image
-            src={`${basePath}/abstract-wave.png`}
-            alt="Abstract Wave Background"
-            fill
-            className="object-cover object-center blur"
-            priority
-          />
-        </div>
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
-          {/* Hero Content */}
-          <div className="space-y-8 relative z-10">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-gray-200 shadow-sm text-gray-500 text-xs font-semibold tracking-wider uppercase">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-              </span>
-              v2.4 Public Beta
-            </div>
-
-            <h1 className="text-6xl md:text-8xl font-bold leading-[0.95] tracking-tighter text-gray-900">
-              Turn APIs into <br />
-              <span className="text-gradient-red">MCP Servers.</span>
-            </h1>
-
-            <p className="text-xl text-gray-500 max-w-lg leading-relaxed font-medium">
-              Build production-ready Model Context Protocol servers in seconds
-              not hours. Just paste your URL.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
-              <button className="px-6 py-3 sm:px-8 sm:py-4 rounded-2xl bg-red-600 hover:bg-red-500 text-white text-sm sm:text-base font-bold shadow-xl shadow-red-500/20 hover:shadow-red-500/40 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2">
-                <Zap className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
-                Start Building Free
-              </button>
-              <button className="px-6 py-3 sm:px-8 sm:py-4 rounded-2xl bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 text-sm sm:text-base font-semibold shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2">
-                <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-current text-gray-400" />
-                Watch Demo
-              </button>
-            </div>
-          </div>
-
-          {/* Vision Pro Style Card UI - Dynamic Workflow */}
-          <div className="relative perspective-1000">
-            {/* Decorative Blobs - Responsive sizing */}
-            <div className="absolute top-4 sm:top-10 right-4 sm:right-10 w-40 h-40 sm:w-64 sm:h-64 bg-red-500/20 rounded-full blur-3xl -z-10 mix-blend-multiply animate-pulse-soft" />
-            <div className="absolute bottom-4 sm:bottom-10 left-4 sm:left-10 w-40 h-40 sm:w-64 sm:h-64 bg-gray-300/20 rounded-full blur-3xl -z-10 mix-blend-multiply" />
-
-            {/* Main Glass Panel */}
-            <div className="glass-card p-4 sm:p-6 md:p-8 animate-float">
-              {/* Header */}
-              <div className="flex items-center justify-between mb-6 sm:mb-8">
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center shadow-lg shadow-red-500/30 text-white">
-                    <Zap className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </div>
-                  <div>
-                    <div className="text-xs sm:text-sm font-bold text-gray-900">
-                      Auto-Recall Engine
-                    </div>
-                    <div className="text-[10px] sm:text-xs text-gray-500">
-                      Live Simulation
-                    </div>
-                  </div>
-                </div>
-                <div className="flex gap-1">
-                  {[0, 1, 2].map((i) => (
-                    <div
-                      key={i}
-                      className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-all duration-300 ${activeStep === i || (activeStep === 3 && i === 2) ? "bg-red-500 scale-125" : "bg-gray-300"}`}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Steps Container */}
-              <div className="relative space-y-3 sm:space-y-4">
-                {/* Step 1: Input */}
-                <div
-                  className={`transition-all duration-500 border rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center gap-2 sm:gap-4 ${activeStep === 0 ? "bg-white shadow-lg border-red-200 scale-105" : "bg-white/40 border-gray-100 opacity-60"}`}
-                >
-                  <div
-                    className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0 ${activeStep === 0 ? "bg-red-100 text-red-600" : "bg-gray-100 text-gray-400"}`}
-                  >
-                    <Globe className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">
-                      Input Source
-                    </div>
-                    <div className="font-mono text-xs sm:text-sm text-gray-600 truncate bg-gray-50 px-2 py-1 rounded">
-                      https://api.store.com/v2/products
-                    </div>
-                  </div>
-                  {activeStep === 0 && (
-                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500 animate-pulse flex-shrink-0" />
-                  )}
-                </div>
-
-                {/* Connecting Line 1 */}
-                <div className="h-3 sm:h-4 flex justify-center">
-                  <div
-                    className={`w-0.5 h-full transition-colors duration-300 ${activeStep >= 1 ? "bg-red-300" : "bg-gray-200"}`}
-                  />
-                </div>
-
-                {/* Step 2: Processing */}
-                <div
-                  className={`transition-all duration-500 border rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center gap-2 sm:gap-4 ${activeStep === 1 ? "bg-white shadow-lg border-red-200 scale-105" : "bg-white/40 border-gray-100 opacity-60"}`}
-                >
-                  <div
-                    className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0 ${activeStep === 1 ? "bg-red-100 text-red-600" : "bg-gray-100 text-gray-400"}`}
-                  >
-                    <Activity
-                      className={`w-4 h-4 sm:w-5 sm:h-5 ${activeStep === 1 ? "animate-spin" : ""}`}
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">
-                      Processing
-                    </div>
-                    <div className="h-1.5 sm:h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full bg-red-500 transition-all duration-[3000ms] ease-linear ${activeStep === 1 ? "w-full" : "w-0"}`}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Connecting Line 2 */}
-                <div className="h-3 sm:h-4 flex justify-center">
-                  <div
-                    className={`w-0.5 h-full transition-colors duration-300 ${activeStep >= 2 ? "bg-red-300" : "bg-gray-200"}`}
-                  />
-                </div>
-
-                {/* Step 3: MCP Output */}
-                <div
-                  className={`transition-all duration-500 border rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center gap-2 sm:gap-4 ${activeStep >= 2 ? "bg-gradient-to-tr from-white to-red-50 shadow-xl border-red-200 scale-105 ring-1 ring-red-100" : "bg-white/40 border-gray-100 opacity-60"}`}
-                >
-                  <div
-                    className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0 ${activeStep >= 2 ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400"}`}
-                  >
-                    <Server className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">
-                      Generated Server
-                    </div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span
-                        className={`text-xs sm:text-sm font-bold truncate ${activeStep >= 2 ? "text-gray-900" : "text-gray-400"}`}
-                      >
-                        petabytes-mcp:latest
-                      </span>
-                      {activeStep >= 2 && (
-                        <span className="px-1.5 py-0.5 rounded text-[9px] sm:text-[10px] font-bold bg-green-100 text-green-700 whitespace-nowrap">
-                          READY
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  {activeStep >= 2 && (
-                    <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Workflow Board (Data-Driven) */}
-      <section className="py-24 px-6 relative z-10">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-16 text-center">
-            <h2 className="text-3xl font-bold text-gray-900">Platform Scale</h2>
-            <p className="text-gray-500 mt-2">
-              Engineered for extreme performance and reliability.
-            </p>
-          </div>
-
-          <div className="relative">
-            {/* SVG Connectors Layer - Hidden on mobile, visible on lg screens */}
-            <div className="hidden lg:block absolute inset-0 pointer-events-none z-0">
-              <svg
-                className="w-full h-full overflow-visible"
-                viewBox="0 0 1200 200"
-                fill="none"
-              >
-                {/* Top Path: Right Flow */}
-                <path
-                  d="M 0 50 H 1200"
-                  stroke="#ef4444"
-                  strokeWidth="3"
-                  strokeDasharray="12 12"
-                  className="opacity-40"
-                />
-                {/* Bottom Path: Left Flow */}
-                <path
-                  d="M 1200 150 H 0"
-                  stroke="#ef4444"
-                  strokeWidth="3"
-                  strokeDasharray="12 12"
-                  className="opacity-40"
-                />
-
-                {/* Animated Particle (Top - Moving Right) */}
-                <circle r="5" fill="#ef4444" className="opacity-60">
-                  <animateMotion
-                    dur="6s"
-                    repeatCount="indefinite"
-                    path="M 0 50 H 1200"
-                  />
-                </circle>
-
-                {/* Animated Particle (Bottom - Moving Left) */}
-                <circle r="5" fill="#ef4444" className="opacity-60">
-                  <animateMotion
-                    dur="6s"
-                    repeatCount="indefinite"
-                    path="M 1200 150 H 0"
-                  />
-                </circle>
-                <defs>
-                  <linearGradient
-                    id="gradient-line"
-                    x1="0%"
-                    y1="0%"
-                    x2="100%"
-                    y2="0%"
-                  >
-                    <stop offset="0%" stopColor="#ef4444" stopOpacity="0.2" />
-                    <stop offset="50%" stopColor="#ef4444" stopOpacity="1" />
-                    <stop offset="100%" stopColor="#ef4444" stopOpacity="0.2" />
-                  </linearGradient>
-                </defs>
-              </svg>
-            </div>
-
-            {/* Stats Cards Container (Workflow Style) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 relative z-10">
-              {/* Stat 1: Latency */}
-              <div className="glass-card p-6 relative group hover:-translate-y-1 transition-transform duration-300">
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold ring-4 ring-white">
-                  1
-                </div>
-                <div className="h-full flex flex-col items-center text-center">
-                  <div className="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <Activity className="w-6 h-6" />
-                  </div>
-                  <h3 className="text-3xl font-bold text-gray-900 mb-1">
-                    &lt; 15ms
-                  </h3>
-                  <p className="text-sm text-gray-500 font-bold uppercase tracking-wider">
-                    Global Latency
-                  </p>
-                </div>
-              </div>
-
-              {/* Stat 2: Uptime */}
-              <div className="glass-card p-6 relative group hover:-translate-y-1 transition-transform duration-300">
-                <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-gray-900 rounded-full flex items-center justify-center text-white text-xs font-bold ring-4 ring-white">
-                  2
-                </div>
-                <div className="h-full flex flex-col items-center text-center">
-                  <div className="w-12 h-12 rounded-2xl bg-gray-50 text-gray-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <Server className="w-6 h-6" />
-                  </div>
-                  <h3 className="text-3xl font-bold text-gray-900 mb-1">
-                    99.99%
-                  </h3>
-                  <p className="text-sm text-gray-500 font-bold uppercase tracking-wider">
-                    Uptime SLA
-                  </p>
-                </div>
-              </div>
-
-              {/* Stat 3: Integrations */}
-              <div className="glass-card p-6 relative group hover:-translate-y-1 transition-transform duration-300">
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-gray-900 rounded-full flex items-center justify-center text-white text-xs font-bold ring-4 ring-white">
-                  3
-                </div>
-                <div className="h-full flex flex-col items-center text-center">
-                  <div className="w-12 h-12 rounded-2xl bg-gray-50 text-gray-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <Layers className="w-6 h-6" />
-                  </div>
-                  <h3 className="text-3xl font-bold text-gray-900 mb-1">
-                    150+
-                  </h3>
-                  <p className="text-sm text-gray-500 font-bold uppercase tracking-wider">
-                    Integrations
-                  </p>
-                </div>
-              </div>
-
-              {/* Stat 4: Active Builds */}
-              <div className="glass-card p-6 relative group hover:-translate-y-1 transition-transform duration-300">
-                <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold ring-4 ring-white">
-                  4
-                </div>
-                <div className="h-full flex flex-col items-center text-center">
-                  <div className="w-12 h-12 rounded-2xl bg-green-50 text-green-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <Cpu className="w-6 h-6" />
-                  </div>
-                  <h3 className="text-3xl font-bold text-gray-900 mb-1">
-                    2.4M
-                  </h3>
-                  <p className="text-sm text-gray-500 font-bold uppercase tracking-wider">
-                    Active Builds
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Grid */}
-      <section id="features" className="py-32 px-6 relative ">
-        {/* Connector Line from Stats (Top) to Features (Bottom) */}
-        <div className="hidden lg:block absolute inset-0 max-w-7xl mx-auto pointer-events-none overflow-visible">
-          <svg
-            className="w-full h-full overflow-visible"
-            viewBox="0 0 1200 800"
-            fill="none"
-            preserveAspectRatio="none"
+      <main className="relative z-10 pt-40">
+        {/* HERO SECTION */}
+        <section className="max-w-7xl mx-auto px-6 text-center mb-40">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 px-4 py-1.5 rounded-full border border-red-200 bg-red-50/50 text-red-600 text-[10px] font-black tracking-[0.2em] uppercase mx-auto w-fit"
           >
-            <defs>
-              <linearGradient
-                id="connector-gradient"
-                x1="0"
-                y1="0"
-                x2="0"
-                y2="1"
-              >
-                <stop offset="0%" stopColor="#ef4444" stopOpacity="0" />
-                <stop offset="20%" stopColor="#ef4444" stopOpacity="0.4" />
-                <stop offset="80%" stopColor="#ef4444" stopOpacity="0.4" />
-                <stop offset="100%" stopColor="#ef4444" stopOpacity="0" />
-              </linearGradient>
-            </defs>
-            {/* Path: Starts above (from Stats), goes down, jogs right, connects to Feature 1 */}
-            <path
-              d="M 150 -100 V 200 C 150 250, 200 250, 200 300 V 450"
-              stroke="#ef4444"
-              strokeWidth="3"
-              strokeDasharray="12 12"
-              className="opacity-40"
-            />
-            {/* Moving particle */}
-            <circle r="5" fill="#ef4444" className="opacity-60">
-              <animateMotion
-                dur="4s"
-                repeatCount="indefinite"
-                path="M 150 -100 V 200 C 150 250, 200 250, 200 300 V 450"
-              />
-            </circle>
-          </svg>
-        </div>
-
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="mb-20 text-center max-w-3xl mx-auto">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900 tracking-tight">
-              Designed for Speed. <br />
-              <span className="text-gray-400">Built for Scale.</span>
-            </h2>
-            <p className="text-xl text-gray-500">
-              Our engine parses your API structure and generates a fully
-              compliant Model Context Protocol server in real-time.
-            </p>
-          </div>
-
-          {/* Dynamic Expanding Features - Wireframe Implementation */}
-          {/* Dynamic Expanding Features - Wireframe Implementation */}
-          <div className="flex flex-col md:flex-row gap-4 h-auto md:h-[400px] transition-all">
-            {[
-              {
-                id: 1,
-                title: "HTTP to MCP",
-                desc: "Directly ingest REST, GraphQL, or SOAP endpoints. We handle the schema mapping automatically.",
-                icon: Globe,
-                visual: (
-                  <Image
-                    src={`${basePath}/images/feat1.png`}
-                    alt="HTTP to MCP Interface"
-                    fill
-                    className="object-contain"
-                  />
-                ),
-              },
-              {
-                id: 2,
-                title: "Live Testing Console",
-                desc: "Debug your MCP tools in real-time before deploying. See exactly what the LLM sees.",
-                icon: Terminal,
-                visual: (
-                  <Image
-                    src={`${basePath}/images/feat2.png`}
-                    alt="Live Testing Console"
-                    fill
-                    className="object-contain"
-                  />
-                ),
-              },
-              {
-                id: 3,
-                title: "One-Click Deploy",
-                desc: "Push to our edge network or export as a Docker container. Your infrastructure, your choice.",
-                icon: Box,
-                visual: (
-                  <Image
-                    src={`${basePath}/images/feat3.png`}
-                    alt="Deployment Dashboard"
-                    fill
-                    className="object-contain"
-                  />
-                ),
-              },
-            ].map((feature, i) => (
-              <div
-                key={feature.id}
-                className="group relative flex-1 md:hover:flex-[3] transition-[flex-grow] duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)] min-h-[380px] md:min-h-full cursor-pointer z-0"
-              >
-                {/* Connector Line (visible on tablet and desktop) */}
-                {i < 2 && (
-                  <div className="hidden md:block absolute -right-5 top-1/2 -translate-y-1/2 w-6 border-t-2 border-dashed border-gray-400/50 z-[-1]" />
-                )}
-
-                {/* Card Container (Inner) */}
-                <div className="w-full h-full relative overflow-hidden rounded-2xl md:rounded-[2.5rem] border border-white/20 shadow-xl">
-                  {/* Main Background (Red Gradient) */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-red-600 to-red-700 opacity-100 transition-colors duration-500" />
-
-                  {/* MOBILE LAYOUT: Vertical Stack with Always-Visible Image */}
-                  <div className="md:hidden relative h-full flex flex-col p-4 gap-4 z-10">
-                    {/* Image - Always visible on mobile */}
-                    <div className="w-full h-40 relative overflow-hidden rounded-xl bg-white/5 backdrop-blur-sm flex-shrink-0">
-                      {feature.visual}
-                    </div>
-
-                    {/* Content */}
-                    <div className="flex-1 flex flex-col justify-between">
-                      <div>
-                        <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center mb-4 text-white shadow-lg">
-                          <feature.icon className="w-6 h-6" />
-                        </div>
-
-                        <h3 className="text-xl font-bold mb-2 text-white">
-                          {feature.title}
-                        </h3>
-
-                        <p className="text-sm font-medium leading-relaxed text-white/90">
-                          {feature.desc}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* TABLET & DESKTOP LAYOUT: Original Expanding Animation */}
-                  <div className="hidden md:flex absolute inset-0 p-3 gap-3">
-                    {/* Left Side: Visual/Image Card (Reveals on Hover) */}
-                    <div className="w-0 group-hover:w-1/2 transition-[width] duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)] relative overflow-hidden rounded-[2rem]">
-                      {feature.visual}
-                    </div>
-
-                    {/* Right Side: Content Card (Transitions to White on Hover) */}
-                    <div className="flex-1 rounded-[2rem] p-6 lg:p-8 flex flex-col justify-between relative z-10 transition-all duration-500 group-hover:bg-white group-hover:shadow-2xl">
-                      <div>
-                        {/* Icon: Transitions from Glass to Red on White Background */}
-                        <div className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center mb-6 text-white shadow-lg group-hover:bg-red-50 group-hover:border-red-100 group-hover:text-red-600 transition-all duration-500">
-                          <feature.icon className="w-6 h-6" />
-                        </div>
-
-                        <h3 className="text-xl lg:text-2xl font-bold mb-3 whitespace-nowrap transition-colors duration-500 text-white group-hover:text-gray-900">
-                          {feature.title}
-                        </h3>
-
-                        <p className="text-sm lg:text-base font-medium leading-relaxed max-w-md transition-colors duration-500 text-white/80 group-hover:text-gray-500">
-                          {feature.desc}
-                        </p>
-                      </div>
-
-                      {/* Arrow / CTA */}
-                      <div className="flex items-center gap-2 font-bold text-sm tracking-widest uppercase transition-all duration-500 translate-y-2 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 text-white group-hover:text-red-600">
-                        <span>Explore</span>
-                        <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Connector: Features -> Workflow */}
-          <div className="hidden lg:block absolute top-[100%] left-0 right-0 h-[400px] w-full pointer-events-none z-0 overflow-visible">
-            <svg
-              className="w-full h-full overflow-visible"
-              viewBox="0 0 1200 400"
-              fill="none"
-              preserveAspectRatio="none"
-            >
-              <defs>
-                <marker
-                  id="arrowhead-down"
-                  markerWidth="10"
-                  markerHeight="7"
-                  refX="5"
-                  refY="3.5"
-                  orient="auto"
-                >
-                  <polygon
-                    points="0 0, 10 3.5, 0 7"
-                    fill="#ef4444"
-                    className="opacity-60"
-                  />
-                </marker>
-              </defs>
-
-              {/* Left Path: Down then Right to Center */}
-              <path
-                d="M 200 -20 V 60 Q 200 80 220 80 H 600"
-                stroke="#ef4444"
-                strokeWidth="3"
-                strokeDasharray="12 12"
-                className="opacity-40"
-              />
-
-              {/* Right Path: Down then Left to Center */}
-              <path
-                d="M 1000 -20 V 60 Q 1000 80 980 80 H 600"
-                stroke="#ef4444"
-                strokeWidth="3"
-                strokeDasharray="12 12"
-                className="opacity-40"
-              />
-
-              {/* Middle Path: Down to Center Intersection */}
-              <path
-                d="M 600 -20 V 80"
-                stroke="#ef4444"
-                strokeWidth="3"
-                strokeDasharray="12 12"
-                className="opacity-40"
-              />
-
-              {/* Output Path: Center Intersection -> Curve Left -> Down to Card */}
-              <path
-                d="M 600 80 V 120 Q 600 140 580 140 H 320 Q 300 140 300 160 V 380"
-                stroke="#ef4444"
-                strokeWidth="3"
-                strokeDasharray="12 12"
-                className="opacity-40"
-                markerEnd="url(#arrowhead-down)"
-              />
-
-              {/* Animated Particles */}
-              {/* Particle 1: Left -> Center -> Output */}
-              <circle r="5" fill="#ef4444" className="opacity-60">
-                <animateMotion
-                  dur="4s"
-                  repeatCount="indefinite"
-                  path="M 200 -20 V 60 Q 200 80 220 80 H 600 V 120 Q 600 140 580 140 H 320 Q 300 140 300 160 V 380"
-                />
-              </circle>
-              {/* Particle 2: Right -> Center -> Output */}
-              <circle r="5" fill="#ef4444" className="opacity-60">
-                <animateMotion
-                  dur="4s"
-                  repeatCount="indefinite"
-                  path="M 1000 -20 V 60 Q 1000 80 980 80 H 600 V 120 Q 600 140 580 140 H 320 Q 300 140 300 160 V 380"
-                  begin="2s"
-                />
-              </circle>
-              {/* Particle 3: Middle -> Center -> Output */}
-              <circle r="5" fill="#ef4444" className="opacity-60">
-                <animateMotion
-                  dur="4s"
-                  repeatCount="indefinite"
-                  path="M 600 -20 V 120 Q 600 140 580 140 H 320 Q 300 140 300 160 V 380"
-                  begin="1s"
-                />
-              </circle>
-            </svg>
-          </div>
-        </div>
-      </section>
-
-      {/* Workflow Section */}
-      <section
-        id="workflow"
-        ref={workflowRef}
-        onMouseMove={handleMouseMove}
-        className="relative z-10 h-[400vh]"
-      >
-        <div className="sticky top-0 h-screen flex items-center justify-center w-full overflow-hidden">
-          <div className="max-w-7xl mx-auto w-full px-6">
-            <div className="grid md:grid-cols-2 gap-20 items-center">
-              {/* Visual */}
-              <div className="relative aspect-square order-2 md:order-1">
-                <div className="absolute inset-0 bg-gradient-to-tr from-gray-200 to-red-50 rounded-full blur-[100px]" />
-                <div className="glass-card w-full h-full p-8 flex flex-col relative z-10">
-                  {/* Dynamic Content */}
-                  <div className="flex-1 relative">
-                    {hoveredWorkflowStep === 0 && (
-                      <div className="animate-fade-in flex flex-col h-full items-center justify-center text-center space-y-6">
-                        <div className="w-24 h-24 rounded-full bg-red-100 flex items-center justify-center relative">
-                          <div className="absolute inset-0 bg-red-200 rounded-full animate-ping opacity-20"></div>
-                          <Globe className="w-10 h-10 text-red-600" />
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-red-500 uppercase tracking-widest mb-2">
-                            Connecting
-                          </p>
-                          <h4 className="text-2xl font-bold text-gray-900">
-                            Endpoint Config
-                          </h4>
-                        </div>
-                        <div className="glass-pill px-6 py-3 font-mono text-sm text-gray-500 bg-white/50">
-                          https://api.petabytes.com/v1
-                        </div>
-                      </div>
-                    )}
-
-                    {hoveredWorkflowStep === 1 && (
-                      <div className="animate-fade-in flex flex-col h-full bg-gray-50 rounded-2xl p-6 border border-gray-100 shadow-inner">
-                        <div className="flex items-center gap-2 mb-4 border-b border-gray-200 pb-4">
-                          <Code className="w-5 h-5 text-gray-400" />
-                          <span className="text-sm font-bold text-gray-600 font-mono">
-                            Transform Logic
-                          </span>
-                        </div>
-                        <div className="space-y-3">
-                          <div className="flex items-center gap-3">
-                            <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                            <div className="h-2 w-24 bg-gray-200 rounded"></div>
-                            <ArrowRight className="w-3 h-3 text-gray-300" />
-                            <div className="h-2 w-32 bg-gray-300 rounded"></div>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                            <div className="h-2 w-16 bg-gray-200 rounded"></div>
-                            <ArrowRight className="w-3 h-3 text-gray-300" />
-                            <div className="h-2 w-28 bg-gray-300 rounded"></div>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                            <div className="h-2 w-20 bg-gray-200 rounded"></div>
-                            <ArrowRight className="w-3 h-3 text-gray-300" />
-                            <div className="h-2 w-16 bg-gray-300 rounded"></div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {hoveredWorkflowStep === 2 && (
-                      <div className="animate-fade-in flex flex-col h-full items-center justify-center text-center">
-                        <div className="w-32 h-32 relative mb-6">
-                          <svg
-                            viewBox="0 0 100 100"
-                            className="w-full h-full rotate-90"
-                          >
-                            <circle
-                              cx="50"
-                              cy="50"
-                              r="45"
-                              fill="none"
-                              stroke="#F3F4F6"
-                              strokeWidth="8"
-                            />
-                            <circle
-                              cx="50"
-                              cy="50"
-                              r="45"
-                              fill="none"
-                              stroke="#10B981"
-                              strokeWidth="8"
-                              strokeDasharray="283"
-                              strokeDashoffset="0"
-                              className="animate-[spin_2s_linear_infinite]"
-                            />
-                          </svg>
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <CheckCircle className="w-12 h-12 text-green-500" />
-                          </div>
-                        </div>
-                        <h4 className="text-2xl font-bold text-gray-900 mb-2">
-                          Build Complete
-                        </h4>
-                        <p className="text-gray-500">Ready for deployment</p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Footer Controls */}
-                  <div className="mt-8 pt-6 border-t border-gray-100 flex justify-between items-center text-xs font-bold text-gray-400 uppercase tracking-widest">
-                    <span>Petabytes Engine v2.4</span>
-                    <div className="flex gap-1.5">
-                      <div
-                        className={`w-2 h-2 rounded-full ${hoveredWorkflowStep === 0 ? "bg-red-500" : "bg-gray-300"}`}
-                      ></div>
-                      <div
-                        className={`w-2 h-2 rounded-full ${hoveredWorkflowStep === 1 ? "bg-red-500" : "bg-gray-300"}`}
-                      ></div>
-                      <div
-                        className={`w-2 h-2 rounded-full ${hoveredWorkflowStep === 2 ? "bg-green-500" : "bg-gray-300"}`}
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Text Steps */}
-              <div className="order-1 md:order-2">
-                <h2 className="text-3xl md:text-5xl font-bold mb-8 text-gray-900">
-                  From URL to <br />
-                  <span className="text-gradient-red">Agent Capability</span>
-                </h2>
-
-                <div className="space-y-6">
-                  {[
-                    {
-                      title: "Connect Data Source",
-                      desc: "Plug in any HTTP/HTTPS URL. We support Auth headers, OAuth, and custom params.",
-                    },
-                    {
-                      title: "Define Logic",
-                      desc: "Use our visual node editor to transform raw JSON into semantic context for AI.",
-                    },
-                    {
-                      title: "Export MCP",
-                      desc: "Get a standardized MCP server link compatible with Claude, OpenAI, and more.",
-                    },
-                  ].map((step, i) => (
-                    <div
-                      key={i}
-                      className={`group p-6 rounded-2xl cursor-pointer transition-all duration-300 border ${hoveredWorkflowStep === i ? "bg-white border-red-100 shadow-xl shadow-red-500/5 scale-102" : "bg-transparent border-transparent hover:bg-white/50"}`}
-                      onMouseEnter={() => setHoveredWorkflowStep(i)}
-                    >
-                      <div className="flex items-start gap-4">
-                        <div
-                          className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${hoveredWorkflowStep === i ? "bg-red-600 text-white" : "bg-gray-200 text-gray-500"}`}
-                        >
-                          {i + 1}
-                        </div>
-                        <div>
-                          <h4
-                            className={`text-lg font-bold mb-2 transition-colors ${hoveredWorkflowStep === i ? "text-gray-900" : "text-gray-500"}`}
-                          >
-                            {step.title}
-                          </h4>
-                          <p className="text-gray-500 text-sm leading-relaxed">
-                            {step.desc}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-24 px-6 relative z-10">
-        {/* Connector: Workflow -> CTA */}
-        <div className="hidden lg:block absolute -top-[220px] left-0 right-0 h-[350px] w-full pointer-events-none z-0 overflow-visible">
-          <svg
-            className="w-full h-full overflow-visible"
-            viewBox="0 0 1200 350"
-            fill="none"
-            preserveAspectRatio="none"
+            The MCP Management Solution for Global Engineering Teams
+          </motion.div>
+          <motion.h1
+            initial={{ opacity: 0, filter: "blur(20px)" }}
+            animate={{ opacity: 1, filter: "blur(0px)" }}
+            className="text-6xl md:text-[10rem] font-black tracking-tighter leading-[0.75] mb-12 text-slate-900 uppercase"
           >
-            <defs>
-              <marker
-                id="arrowhead-cta"
-                markerWidth="10"
-                markerHeight="7"
-                refX="5"
-                refY="3.5"
-                orient="auto"
-              >
-                <polygon
-                  points="0 0, 10 3.5, 0 7"
-                  fill="#ef4444"
-                  className="opacity-60"
-                />
-              </marker>
-            </defs>
-
-            {/* Path: Left Column (Visual) -> Center (CTA) */}
-            {/* Starts high (y=50) inside the -220px container, drops to 300 */}
-            <path
-              d="M 300 50 V 200 Q 300 220 320 220 H 580 Q 600 220 600 240 V 300"
-              stroke="#ef4444"
-              strokeWidth="3"
-              strokeDasharray="12 12"
-              className="opacity-40"
-              markerEnd="url(#arrowhead-cta)"
-            />
-
-            {/* Animated Particle */}
-            <circle r="5" fill="#ef4444" className="opacity-60">
-              <animateMotion
-                dur="4s"
-                repeatCount="indefinite"
-                path="M 300 50 V 200 Q 300 220 320 220 H 580 Q 600 220 600 240 V 300"
-              />
-            </circle>
-          </svg>
-        </div>
-        <div className="max-w-5xl mx-auto text-center relative z-10 glass-card p-12 bg-gradient-to-br from-red-600 to-red-700 border-red-500/30">
-          <h2 className="text-4xl md:text-6xl font-bold mb-6 text-white tracking-tight">
-            Ready to automate?
-          </h2>
-          <p className="text-xl text-red-100 mb-10 max-w-2xl mx-auto font-medium">
-            Join thousands of developers building the next generation of AI
-            tools using the Model Context Protocol.
+            One Hub.
+            <br />
+            <span className="text-red-600 italic">Total Control.</span>
+          </motion.h1>
+          <p className="text-slate-500 text-lg md:text-2xl max-w-3xl mx-auto mb-12 leading-relaxed">
+            Stop managing disjointed MCP servers. Petabytes provides a unified
+            interface to deploy, secure, and monitor every AI protocol bridge in
+            your enterprise architecture.
           </p>
+          <div className="flex gap-4 justify-center">
+            <GlowingButton primary>Claim Your Hub</GlowingButton>
+            <GlowingButton>View Demo</GlowingButton>
+          </div>
+        </section>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="w-full sm:w-80 px-6 py-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder-red-200 focus:outline-none focus:ring-2 focus:ring-white/30 transition-all font-medium backdrop-blur-md"
-            />
-            <button className="w-full sm:w-auto px-8 py-4 rounded-xl bg-white text-red-600 font-bold hover:bg-red-50 hover:-translate-y-1 transition-all shadow-xl shadow-black/10">
-              Get Early Access
+        {/* PILLARS */}
+        <section className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-6 mb-40">
+          <FeatureCard
+            index={0}
+            icon={<Lock />}
+            title="Security Enclave"
+            description="Centralized AuthZ/AuthN for all MCP resources. Identity-aware protocol bridging."
+          />
+          <FeatureCard
+            index={1}
+            icon={<Server />}
+            title="Fleet Management"
+            description="Deploy and scale 100+ MCP servers globally from a single configuration file."
+          />
+          <FeatureCard
+            index={2}
+            icon={<Database />}
+            title="Unified Registry"
+            description="A shared versioned catalog for all your enterprise tools and AI agent resources."
+          />
+          <FeatureCard
+            index={3}
+            icon={<LayoutDashboard />}
+            title="Real-time Portal"
+            description="Full visibility into agent interactions, token costs, and bridge performance."
+          />
+        </section>
+
+        {/* --- SUPERMCP PIPELINE VISUALIZATION --- */}
+        <motion.section
+          variants={sectionFadeVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ amount: 0.1 }}
+          className="max-w-7xl mx-auto px-6 mb-40"
+        >
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-black text-slate-900 uppercase tracking-tighter italic">
+              SuperMcp Pipeline
+            </h2>
+            <p className="text-slate-500">
+              Live visualization of the 5-Layer Semantic Agent Architecture.
+            </p>
+          </div>
+
+          <GlassCard className="p-1">
+            <div className="bg-white/40 rounded-[2.5rem] overflow-hidden flex flex-col md:flex-row h-[800px]">
+              {/* Sidebar: Managed Nodes */}
+              <div className="w-full md:w-72 border-r border-slate-100 flex flex-col bg-white/30 backdrop-blur-sm">
+                <div className="p-8 border-b border-slate-100 bg-slate-50/50">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-4">
+                    Mcp Nodes
+                  </span>
+                  <div className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-lg shadow-sm">
+                    <Search size={14} className="text-slate-400" />
+                    <input
+                      placeholder="Search nodes..."
+                      className="bg-transparent border-none outline-none text-xs w-full font-medium"
+                    />
+                  </div>
+                </div>
+                <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
+                  {MCP_SERVERS.map((server, idx) => (
+                    <button
+                      key={server.id}
+                      onClick={() => setSelectedMcp(idx)}
+                      className={`w-full p-4 rounded-2xl text-left transition-all flex items-center justify-between group ${selectedMcp === idx ? "bg-red-50 border border-red-100 shadow-sm" : "hover:bg-slate-50 border border-transparent"}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`w-2 h-2 rounded-full ${server.status === "online" ? "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]" : "bg-amber-500 animate-pulse"}`}
+                        />
+                        <div className="min-w-0">
+                          <p
+                            className={`text-xs font-black uppercase tracking-tight truncate ${selectedMcp === idx ? "text-red-600" : "text-slate-700"}`}
+                          >
+                            {server.name}
+                          </p>
+                          <p className="text-[9px] text-slate-400 font-mono truncate">
+                            {server.type}
+                          </p>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+                <div className="p-6 border-t border-slate-100 text-center">
+                  <div className="flex justify-center gap-4 text-[10px] font-mono text-slate-400">
+                    <span className="flex items-center gap-1">
+                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />{" "}
+                      CPU: 12%
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />{" "}
+                      MEM: 4GB
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Main Dashboard Panel */}
+              <div className="flex-1 flex flex-col min-w-0 bg-slate-50/30">
+                {/* Pipeline Header */}
+                <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-white/40">
+                  <div className="flex items-center gap-4">
+                    <div className="p-2 bg-slate-900 text-white rounded-lg">
+                      <Terminal size={18} />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-black text-slate-900 uppercase tracking-wide">
+                        Orchestration Trace
+                      </h3>
+                      <p className="text-[10px] text-slate-500 font-mono">
+                        ID: req_8f92_weather_sf
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="px-3 py-1 rounded-full bg-green-100 text-green-700 text-[10px] font-bold uppercase border border-green-200">
+                      Active
+                    </span>
+                    <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold uppercase border border-slate-200">
+                      v2.4.0
+                    </span>
+                  </div>
+                </div>
+
+                {/* 5-Layer Pipeline Visualizer */}
+                <div className="flex-1 relative p-12 flex flex-col items-center justify-center">
+                  <div className="absolute inset-x-0 h-px bg-slate-200 top-1/2 -z-10" />
+
+                  <div className="grid grid-cols-5 gap-4 w-full relative z-10">
+                    {PIPELINE_STEPS.map((step, idx) => {
+                      const isActive = pipelineStep === idx;
+                      const isPast = pipelineStep > idx;
+
+                      return (
+                        <div
+                          key={step.id}
+                          className="relative flex flex-col items-center group"
+                        >
+                          <motion.div
+                            animate={{
+                              scale: isActive ? 1.1 : 1,
+                              borderColor: isActive
+                                ? "rgb(220,38,38)"
+                                : isPast
+                                  ? "rgb(34,197,94)"
+                                  : "rgb(226,232,240)",
+                              backgroundColor: isActive
+                                ? "rgb(255,255,255)"
+                                : isPast
+                                  ? "rgb(240,253,244)"
+                                  : "rgb(248,250,252)",
+                            }}
+                            className={`w-16 h-16 rounded-2xl flex items-center justify-center border-2 shadow-lg mb-6 transition-colors duration-300 relative z-20`}
+                          >
+                            <step.icon
+                              size={24}
+                              className={
+                                isActive
+                                  ? "text-red-600"
+                                  : isPast
+                                    ? "text-green-500"
+                                    : "text-slate-300"
+                              }
+                            />
+
+                            {/* Pulse Effect */}
+                            {isActive && (
+                              <div className="absolute inset-0 bg-red-500/20 rounded-2xl animate-ping" />
+                            )}
+                          </motion.div>
+
+                          <div className="text-center">
+                            <h4
+                              className={`text-xs font-black uppercase tracking-wider mb-1 ${isActive ? "text-red-600" : "text-slate-500"}`}
+                            >
+                              {step.label}
+                            </h4>
+                            <p className="text-[9px] font-mono text-slate-400 bg-white px-2 py-0.5 rounded border border-slate-100 inline-block">
+                              {step.sub}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Live Log Output */}
+                <div className="h-64 bg-slate-900 p-6 flex flex-col border-t border-slate-200 font-mono text-xs overflow-hidden">
+                  <div className="flex items-center justify-between mb-4 border-b border-slate-800 pb-2">
+                    <span className="text-slate-400 font-black uppercase text-[10px]">
+                      Execution Log
+                    </span>
+                    <div className="flex gap-1">
+                      <div className="w-2 h-2 rounded-full bg-red-500" />
+                      <div className="w-2 h-2 rounded-full bg-amber-500" />
+                      <div className="w-2 h-2 rounded-full bg-green-500" />
+                    </div>
+                  </div>
+                  <div className="flex-1 space-y-2 text-slate-300">
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={pipelineStep}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0.5, filter: "blur(2px)" }}
+                        className="space-y-1"
+                      >
+                        {PIPELINE_STEPS[pipelineStep].log
+                          .split("\n")
+                          .map((line, i) => (
+                            <p key={i} className="flex gap-2">
+                              <span className="text-slate-600 select-none">
+                                {new Date().toTimeString().split(" ")[0]}
+                              </span>
+                              <span
+                                className={
+                                  line.includes("Error")
+                                    ? "text-red-400"
+                                    : line.includes("Passed")
+                                      ? "text-green-400"
+                                      : "text-slate-300"
+                                }
+                              >
+                                {line}
+                              </span>
+                            </p>
+                          ))}
+                        <motion.span
+                          animate={{ opacity: [0, 1, 0] }}
+                          transition={{ repeat: Infinity, duration: 0.8 }}
+                          className="inline-block w-2 h-4 bg-red-500/50 align-middle ml-1"
+                        />
+                      </motion.div>
+                    </AnimatePresence>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </GlassCard>
+        </motion.section>
+
+        {/* PLATFORM COMPONENTS (Stacklok extraction) */}
+        <section className="max-w-7xl mx-auto px-6 mb-40">
+          <div className="text-center mb-16">
+            <h2 className="text-5xl font-black text-slate-900 uppercase tracking-tighter italic">
+              Architected for Enterprises
+            </h2>
+            <p className="text-slate-500 mt-4 max-w-2xl mx-auto">
+              One suite of modular tools to manage, secure, and deploy your
+              organizational AI journey.
+            </p>
+          </div>
+          <GlassCard>
+            <div className="grid grid-cols-1 md:grid-cols-4 bg-white/30 backdrop-blur-3xl rounded-[2.5rem]">
+              <PlatformComponent
+                title="Gateway"
+                items={[
+                  "Enterprise auth integration",
+                  "Rate limiting per model",
+                  "Global context caching",
+                ]}
+              />
+              <PlatformComponent
+                title="Registry"
+                items={[
+                  "Centralized tool catalogs",
+                  "Org-wide resource access",
+                  "Schema version control",
+                ]}
+              />
+              <PlatformComponent
+                title="Runtime"
+                items={[
+                  "Isolated execution nodes",
+                  "Serverless MCP orchestration",
+                  "Cold-start optimization",
+                ]}
+              />
+              <PlatformComponent
+                title="Portal"
+                items={[
+                  "Fleet-wide observability",
+                  "Cost and token analysis",
+                  "Compliance audit logs",
+                ]}
+              />
+            </div>
+          </GlassCard>
+        </section>
+
+        {/* FAQ & CTA */}
+        <section className="max-w-7xl mx-auto px-6 mb-40 grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="p-12 rounded-[3rem] bg-red-600 text-white flex flex-col justify-between h-[450px] shadow-2xl shadow-red-200">
+            <h3 className="text-4xl font-black uppercase italic leading-none">
+              Scale your <br />
+              intelligence <br />
+              securely
+            </h3>
+            <p className="text-red-100 text-lg leading-relaxed">
+              Join the world&apos;s most innovative engineering teams building
+              on the Petabytes Protocol.
+            </p>
+            <button className="flex items-center gap-2 font-black uppercase tracking-widest text-[11px] group">
+              Read Architecture docs{" "}
+              <ArrowRight
+                size={16}
+                className="group-hover:translate-x-2 transition-transform"
+              />
             </button>
           </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="border-t border-gray-200 py-12 px-6 bg-white/50 backdrop-blur-xl relative z-10">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-md bg-red-50">
-              <Layers className="w-4 h-4 text-red-600" />
+          <GlassCard className="md:col-span-2 p-14 flex flex-col gap-8 h-[450px]">
+            <div className="flex gap-4 items-center">
+              <HelpCircle className="text-red-600" size={32} />
+              <h3 className="text-3xl font-black text-slate-900 uppercase">
+                Platform Intelligence
+              </h3>
             </div>
-            <span className="font-bold text-gray-900">Petabytes</span>
+            <div className="space-y-6 overflow-y-auto">
+              {[
+                {
+                  q: "Is Petabytes a multi-tenant hub?",
+                  a: "Yes, our managed hub supports isolated organizations with granular RBAC permissions for every MCP resource.",
+                },
+                {
+                  q: "Can we self-host the Synthesis Core?",
+                  a: "Enterprise plans include private cloud deployment options on AWS, GCP, or Azure with our edge SDK.",
+                },
+                {
+                  q: "How does it handle token efficiency?",
+                  a: "Our Gateway optimizes resource injection dynamically, reducing LLM context overhead by stripping unnecessary REST metadata.",
+                },
+              ].map((item, i) => (
+                <div
+                  key={i}
+                  className="pb-6 border-b border-slate-100 last:border-none"
+                >
+                  <p className="font-bold text-slate-900 mb-2 uppercase text-xs tracking-widest">
+                    {item.q}
+                  </p>
+                  <p className="text-slate-500 text-sm leading-relaxed">
+                    {item.a}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </GlassCard>
+        </section>
+
+        <section className="py-60 px-6 text-center relative overflow-hidden">
+          <div className="absolute inset-0 bg-red-500/10 blur-[200px]" />
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            className="text-7xl md:text-[12rem] font-black tracking-tighter mb-16 leading-[0.8] uppercase italic text-slate-900"
+          >
+            Unified <br />
+            <span className="text-red-600">Sync.</span>
+          </motion.h2>
+          <GlowingButton primary>Get Access Now</GlowingButton>
+        </section>
+      </main>
+
+      <footer className="border-t border-slate-100 bg-white/60 backdrop-blur-3xl px-10 py-20 text-center relative z-20">
+        <div className="flex items-center justify-center gap-2 mb-6">
+          <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-red-600 shadow-sm border border-slate-200">
+            <Layers size={16} />
           </div>
-          <div className="text-sm text-gray-500 font-medium">
-            © 2026 Petabytes Inc. All rights reserved.
-          </div>
-          <div className="flex gap-6 text-gray-500 font-medium">
-            <a href="#" className="hover:text-red-600 transition-colors">
-              Twitter
-            </a>
-            <a href="#" className="hover:text-red-600 transition-colors">
-              GitHub
-            </a>
-            <a href="#" className="hover:text-red-600 transition-colors">
-              Discord
-            </a>
-          </div>
+          <span className="font-black text-sm uppercase">
+            Petabytes Protocol
+          </span>
         </div>
+        <span className="text-slate-400 text-[10px] font-black tracking-[0.4em] uppercase">
+          © 2025 // THE STANDARD FOR MANAGED MCP FLEETS.
+        </span>
       </footer>
+
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.05); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(220,38,38,0.2); }
+      `,
+        }}
+      />
     </div>
   );
 }
