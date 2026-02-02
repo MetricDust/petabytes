@@ -18,11 +18,8 @@ import {
   Terminal,
   Layers,
   Search,
-  Lock,
   CheckCircle2,
   HelpCircle,
-  Server,
-  LayoutDashboard,
   Database,
 } from "lucide-react";
 
@@ -268,7 +265,7 @@ const FeatureCard = ({
               )
             : null}
         </div>
-        <h3 className="text-xl font-bold mb-3 text-slate-900 leading-none">
+        <h3 className="text-xl font-bold mb-3 text-slate-400 leading-none">
           {title}
         </h3>
         <p className="text-slate-500 text-sm leading-relaxed">{description}</p>
@@ -470,7 +467,7 @@ export default function Home() {
       status: "online",
       endpoint: "http://localhost:7001",
       type: "Reference Impl",
-      desc: "Basic math & weather tools",
+      desc: "Math, weather & time tools",
     },
     {
       id: "semantic-tool",
@@ -478,15 +475,15 @@ export default function Home() {
       status: "online",
       endpoint: "http://localhost:8000",
       type: "Orchestrator",
-      desc: "The SuperMcp Brain",
+      desc: "5-Layer Agent Pipeline",
     },
     {
-      id: "stripe-agent",
-      name: "Stripe Finance",
-      status: "warning",
-      endpoint: "https://api.stripe.com/v1",
-      type: "Production",
-      desc: "Payment processing bridge",
+      id: "ollama-server",
+      name: "Ollama LLM",
+      status: "online",
+      endpoint: "http://ollama:11434",
+      type: "Model Provider",
+      desc: "gemma3:4b inference",
     },
   ];
 
@@ -534,21 +531,21 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             className="mb-6 px-4 py-1.5 rounded-full border border-red-200 bg-red-50/50 text-red-600 text-[10px] font-black tracking-[0.2em] uppercase mx-auto w-fit"
           >
-            The MCP Management Solution for Global Engineering Teams
+            AI Agent Pipeline with MCP Tool Integration and Semantic Filtering
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, filter: "blur(20px)" }}
             animate={{ opacity: 1, filter: "blur(0px)" }}
-            className="text-6xl md:text-[10rem] font-black tracking-tighter leading-[0.75] mb-12 text-slate-900 uppercase"
+            className="text-6xl md:text-[10rem] font-black tracking-tighter leading-[0.75] mb-12 text-slate-400 uppercase"
           >
             One Hub.
             <br />
             <span className="text-red-600 italic">Total Control.</span>
           </motion.h1>
           <p className="text-slate-500 text-lg md:text-2xl max-w-3xl mx-auto mb-12 leading-relaxed">
-            Stop managing disjointed MCP servers. Petabytes provides a unified
-            interface to deploy, secure, and monitor every AI protocol bridge in
-            your enterprise architecture.
+            Stop managing disjointed MCP servers. SuperMcp provides a 5-layer
+            semantic agent pipeline with intelligent tool filtering, parameter
+            validation, and multi-turn conversation memory.
           </p>
           <div className="flex gap-4 justify-center">
             <GlowingButton primary>Claim Your Hub</GlowingButton>
@@ -560,27 +557,27 @@ export default function Home() {
         <section className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-6 mb-40">
           <FeatureCard
             index={0}
-            icon={<Lock />}
-            title="Security Enclave"
-            description="Centralized AuthZ/AuthN for all MCP resources. Identity-aware protocol bridging."
+            icon={<Search />}
+            title="Semantic Filtering"
+            description="Microsoft E5 embeddings for intelligent tool selection. Top-k search with configurable minimum scores."
           />
           <FeatureCard
             index={1}
-            icon={<Server />}
-            title="Fleet Management"
-            description="Deploy and scale 100+ MCP servers globally from a single configuration file."
+            icon={<Shield />}
+            title="Parameter Validation"
+            description="Validates tool calls before execution. Asks for missing parameters instead of guessing."
           />
           <FeatureCard
             index={2}
             icon={<Database />}
-            title="Unified Registry"
-            description="A shared versioned catalog for all your enterprise tools and AI agent resources."
+            title="Conversation Memory"
+            description="Multi-turn conversations with TTL and LRU eviction. Configurable max conversations per session."
           />
           <FeatureCard
             index={3}
-            icon={<LayoutDashboard />}
-            title="Real-time Portal"
-            description="Full visibility into agent interactions, token costs, and bridge performance."
+            icon={<Cpu />}
+            title="ReAct Pattern"
+            description="Thought → Action → Observation loop powered by Haystack agents for maximum accuracy."
           />
         </section>
 
@@ -593,7 +590,7 @@ export default function Home() {
           className="max-w-7xl mx-auto px-6 mb-40"
         >
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-black text-slate-900 uppercase tracking-tighter italic">
+            <h2 className="text-4xl font-black text-slate-400 uppercase tracking-tighter italic">
               SuperMcp Pipeline
             </h2>
             <p className="text-slate-500">
@@ -665,7 +662,7 @@ export default function Home() {
                       <Terminal size={18} />
                     </div>
                     <div>
-                      <h3 className="text-sm font-black text-slate-900 uppercase tracking-wide">
+                      <h3 className="text-sm font-black text-slate-400 uppercase tracking-wide">
                         Orchestration Trace
                       </h3>
                       <p className="text-[10px] text-slate-500 font-mono">
@@ -804,46 +801,46 @@ export default function Home() {
         {/* PLATFORM COMPONENTS (Stacklok extraction) */}
         <section className="max-w-7xl mx-auto px-6 mb-40">
           <div className="text-center mb-16">
-            <h2 className="text-5xl font-black text-slate-900 uppercase tracking-tighter italic">
-              Architected for Enterprises
+            <h2 className="text-5xl font-black text-slate-400 uppercase tracking-tighter italic">
+              Modular Architecture
             </h2>
             <p className="text-slate-500 mt-4 max-w-2xl mx-auto">
-              One suite of modular tools to manage, secure, and deploy your
-              organizational AI journey.
+              Clean dependency injection with interface segregation. Every
+              component is testable, swappable, and built for production scale.
             </p>
           </div>
           <GlassCard>
             <div className="grid grid-cols-1 md:grid-cols-4 bg-white/30 backdrop-blur-3xl rounded-[2.5rem]">
               <PlatformComponent
-                title="Gateway"
+                title="API Layer"
                 items={[
-                  "Enterprise auth integration",
-                  "Rate limiting per model",
-                  "Global context caching",
+                  "FastAPI routes & models",
+                  "Chat, tools, health endpoints",
+                  "Cursor-based pagination",
                 ]}
               />
               <PlatformComponent
-                title="Registry"
+                title="Core Engine"
                 items={[
-                  "Centralized tool catalogs",
-                  "Org-wide resource access",
-                  "Schema version control",
+                  "Abstract interfaces (DI)",
+                  "Tool call extraction",
+                  "2-level semantic filter",
                 ]}
               />
               <PlatformComponent
-                title="Runtime"
+                title="Pipeline"
                 items={[
-                  "Isolated execution nodes",
-                  "Serverless MCP orchestration",
-                  "Cold-start optimization",
+                  "5-layer agent execution",
+                  "Haystack + ReAct pattern",
+                  "Parameter validation",
                 ]}
               />
               <PlatformComponent
-                title="Portal"
+                title="Infrastructure"
                 items={[
-                  "Fleet-wide observability",
-                  "Cost and token analysis",
-                  "Compliance audit logs",
+                  "Circuit breaker resilience",
+                  "HTTP retry policies",
+                  "DuckDB persistence",
                 ]}
               />
             </div>
@@ -873,30 +870,30 @@ export default function Home() {
           <GlassCard className="md:col-span-2 p-14 flex flex-col gap-8 h-[450px]">
             <div className="flex gap-4 items-center">
               <HelpCircle className="text-red-600" size={32} />
-              <h3 className="text-3xl font-black text-slate-900 uppercase">
+              <h3 className="text-3xl font-black text-slate-400 uppercase">
                 Platform Intelligence
               </h3>
             </div>
             <div className="space-y-6 overflow-y-auto">
               {[
                 {
-                  q: "Is Petabytes a multi-tenant hub?",
-                  a: "Yes, our managed hub supports isolated organizations with granular RBAC permissions for every MCP resource.",
+                  q: "How does semantic filtering work?",
+                  a: "Microsoft E5 embeddings create vector representations of your query and available tools. Top-k search (default k=10) finds the best matches above a minimum score threshold.",
                 },
                 {
-                  q: "Can we self-host the Synthesis Core?",
-                  a: "Enterprise plans include private cloud deployment options on AWS, GCP, or Azure with our edge SDK.",
+                  q: "Can I deploy on CPU or GPU?",
+                  a: "Yes! Use docker-compose.cpu.yml for CPU mode or docker-compose.yml for GPU acceleration with NVIDIA support.",
                 },
                 {
-                  q: "How does it handle token efficiency?",
-                  a: "Our Gateway optimizes resource injection dynamically, reducing LLM context overhead by stripping unnecessary REST metadata.",
+                  q: "How does clarification work?",
+                  a: "When required parameters are missing, the agent asks for clarification instead of guessing. This prevents incorrect tool calls and improves accuracy.",
                 },
               ].map((item, i) => (
                 <div
                   key={i}
                   className="pb-6 border-b border-slate-100 last:border-none"
                 >
-                  <p className="font-bold text-slate-900 mb-2 uppercase text-xs tracking-widest">
+                  <p className="font-bold text-slate-400 mb-2 uppercase text-xs tracking-widest">
                     {item.q}
                   </p>
                   <p className="text-slate-500 text-sm leading-relaxed">
@@ -913,7 +910,7 @@ export default function Home() {
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            className="text-7xl md:text-[12rem] font-black tracking-tighter mb-16 leading-[0.8] uppercase italic text-slate-900"
+            className="text-7xl md:text-[12rem] font-black tracking-tighter mb-16 leading-[0.8] uppercase italic text-slate-400"
           >
             Unified <br />
             <span className="text-red-600">Sync.</span>
@@ -922,18 +919,33 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="border-t border-slate-100 bg-white/60 backdrop-blur-3xl px-10 py-20 text-center relative z-20">
-        <div className="flex items-center justify-center gap-2 mb-6">
-          <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-red-600 shadow-sm border border-slate-200">
-            <Layers size={16} />
-          </div>
-          <span className="font-black text-sm uppercase">
-            Petabytes Protocol
+      <footer className="w-full border-t border-slate-100 bg-white/60 backdrop-blur-3xl px-10 pt-32 pb-0 text-center relative z-20 overflow-hidden">
+        {/* Background Watermark - Fixed Scale */}
+        <div
+          className="absolute inset-x-0 bottom-0 flex justify-center pointer-events-none -z-10 select-none"
+          style={{ transform: "translateY(20%)" }}
+        >
+          <span
+            className="font-black text-slate-300/30 uppercase tracking-tighter leading-none whitespace-nowrap"
+            style={{ fontSize: "16vw" }}
+          >
+            petabytes
           </span>
         </div>
-        <span className="text-slate-400 text-[10px] font-black tracking-[0.4em] uppercase">
-          © 2025 // THE STANDARD FOR MANAGED MCP FLEETS.
-        </span>
+
+        <div className="relative z-10 pb-24">
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-red-600 shadow-sm border border-slate-200">
+              <Layers size={16} />
+            </div>
+            <span className="font-black text-sm uppercase">
+              Petabytes Protocol
+            </span>
+          </div>
+          <span className="text-slate-400 text-[10px] font-black tracking-[0.4em] uppercase">
+            © 2025 // THE STANDARD FOR MANAGED MCP FLEETS.
+          </span>
+        </div>
       </footer>
 
       <style
