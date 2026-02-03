@@ -905,21 +905,50 @@ export default function Home() {
           </GlassCard>
         </section>
 
-        <section className="py-60 px-6 text-center relative overflow-hidden">
-          <div className="absolute inset-0 bg-red-500/10 blur-[200px]" />
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            className="text-7xl md:text-[12rem] font-black tracking-tighter mb-16 leading-[0.8] uppercase italic text-slate-400"
+        <section className="relative w-full h-screen overflow-hidden flex items-center justify-center">
+          {/* Cinematic Full Width Video */}
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
           >
-            Unified <br />
-            <span className="text-red-600">Sync.</span>
-          </motion.h2>
-          <GlowingButton primary>Get Access Now</GlowingButton>
+            <source
+              src="/videos/SuperMcp_Tech_Demo_Video.mp4"
+              type="video/mp4"
+            />
+          </video>
+
+          {/* Minimal shadow overlay for text legibility */}
+          <div className="absolute inset-0 bg-black/20" />
+
+          {/* Centered Content Overlay */}
+          <div className="relative z-30 text-center px-6">
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <h2 className="text-6xl md:text-[15rem] font-black tracking-tighter leading-[0.8] uppercase italic text-white drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
+                Unified <br />
+                <span className="text-red-500">Sync.</span>
+              </h2>
+              <p className="text-white text-lg md:text-2xl font-black uppercase tracking-[0.3em] mt-6 drop-shadow-xl">
+                The Standard for AI Agent Orchestration
+              </p>
+              <div className="mt-12">
+                <GlowingButton primary>Get Access Now</GlowingButton>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Cinematic Smooth Fade to Footer */}
+          <div className="absolute bottom-0 left-0 w-full h-[50vh] bg-gradient-to-t from-white via-white/80 to-transparent z-10 pointer-events-none" />
         </section>
       </main>
 
-      <footer className="w-full border-t border-slate-100 bg-white/60 backdrop-blur-3xl px-10 pt-32 pb-0 text-center relative z-20 overflow-hidden">
+      <footer className="w-full bg-white px-10 pb-0 text-center relative z-20 overflow-hidden">
         {/* Background Watermark - Fixed Scale */}
         <div
           className="absolute inset-x-0 bottom-0 flex justify-center pointer-events-none -z-10 select-none"
