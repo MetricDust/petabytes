@@ -24,6 +24,8 @@ import {
   Database,
 } from "lucide-react";
 
+const BASE_PATH = process.env.NODE_ENV === "production" ? "/petabytes" : "";
+
 /* ----------------------------------------------------------------------
    GLSL SHADERS (Audio Visualizer) - Tuned for Light Mode
    ----------------------------------------------------------------------
@@ -916,7 +918,7 @@ export default function Home() {
             className="absolute inset-0 w-full h-full object-cover"
           >
             <source
-              src="/videos/SuperMcp_Tech_Demo_Video.mp4"
+              src={`${BASE_PATH}/videos/SuperMcp_Tech_Demo_Video.mp4`}
               type="video/mp4"
             />
           </video>
