@@ -46,7 +46,7 @@ const HeroSection = () => {
 
     // Design Tokens
     const COLORS = {
-      whiteMatte: 0xf8f9fa,
+      whiteMatte: 0xffffff, // Pure White
       glowRed: 0xff0000, // Pure Blood Red
       glowDarkRed: 0x330000, // Dark base to prevent pink washout under high intensity
       darkCore: 0x1a1a1a,
@@ -87,9 +87,10 @@ const HeroSection = () => {
     controls.minDistance = 10;
     controls.maxDistance = 50;
 
-    // Lock camera rotation and panning so the base stays fixed
+    // Lock camera rotation, panning, and zoom so the base stays fixed
     controls.enableRotate = false;
     controls.enablePan = false;
+    controls.enableZoom = false;
     controlsRef.current = controls;
 
     // Setup Custom Drag Interaction
@@ -140,12 +141,12 @@ const HeroSection = () => {
 
     // --- LIGHTING ---
     const setupLighting = () => {
-      // Soft ambient light
-      const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+      // Bright ambient light
+      const ambient = new THREE.AmbientLight(0xffffff, 0.8);
       scene.add(ambient);
 
-      // Main directional light (Key light)
-      const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      // Strong directional light (Key light)
+      const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
       dirLight.position.set(-10, 20, 10);
       dirLight.castShadow = true;
       dirLight.shadow.mapSize.width = 2048;
@@ -243,9 +244,11 @@ const HeroSection = () => {
 
       const radius = 5;
       const standardMat = new THREE.MeshStandardMaterial({
-        color: COLORS.whiteMatte,
-        roughness: 0.6,
+        color: 0xffffff,
+        roughness: 0.4,
         metalness: 0.1,
+        emissive: 0xffffff,
+        emissiveIntensity: 0.2,
       });
 
       // 1. Top Dome
@@ -287,10 +290,9 @@ const HeroSection = () => {
         Math.PI * 0.35,
       );
       const bottomMat = new THREE.MeshStandardMaterial({
-        color: COLORS.whiteMatte,
-        roughness: 0.6,
-        // Add slight emissive red to simulate reflection from the base
-        emissive: COLORS.glowRed,
+        color: 0xffffff,
+        roughness: 0.4,
+        emissive: 0xffffff,
         emissiveIntensity: 0.2,
       });
       const bottomDome = new THREE.Mesh(bottomGeo, bottomMat);
@@ -308,9 +310,11 @@ const HeroSection = () => {
         Math.PI * 0.3,
       );
       const middleMat = new THREE.MeshStandardMaterial({
-        color: COLORS.whiteMatte,
-        roughness: 0.7,
-        metalness: 0.2,
+        color: 0xffffff,
+        roughness: 0.5,
+        metalness: 0.1,
+        emissive: 0xffffff,
+        emissiveIntensity: 0.2,
       });
       const middleBand = new THREE.Mesh(middleGeo, middleMat);
       middleBand.castShadow = true;
