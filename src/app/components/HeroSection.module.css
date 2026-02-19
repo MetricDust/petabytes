@@ -1,0 +1,61 @@
+.container {
+  overflow: hidden;
+  background: linear-gradient(90deg, #2a2d34 25%, #f0f2f5 25%);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+
+.canvasContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 10; /* Ensures the 3D canvas stays on top of the text and the new panel */
+}
+
+.heroHeading {
+  position: absolute;
+  top: 15%;
+  left: 6%;
+  margin: 0;
+  font-size: clamp(4rem, 10vw, 12rem);
+  font-weight: 900;
+  color: #000000; /* Forced black */
+  z-index: 1; /* Placed cleanly behind the 3D scene */
+  text-transform: uppercase;
+  letter-spacing: -2px;
+  line-height: 0.85;
+  white-space: pre-line; /* Allows us to force a line break in JS */
+}
+
+.cursor {
+  display: inline-block;
+  width: 0.1em;
+  height: 0.8em;
+  background-color: #ff0000; /* Ties into your pure blood red glow */
+  margin-left: 8px;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #ff9d00;
+  font-size: 1.2rem;
+  font-weight: bold;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  z-index: 20;
+}
