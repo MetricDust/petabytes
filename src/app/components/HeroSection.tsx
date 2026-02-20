@@ -92,6 +92,7 @@ const HeroSection = () => {
 
     // 4. Controls
     const controls = new OrbitControls(camera, renderer.domElement);
+    controls.target.set(-7, 0, 0); // Shift center to the left so globe moves right
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
     controls.maxPolarAngle = Math.PI / 2 + 0.1; // Don't allow going too far below the base
@@ -575,46 +576,36 @@ const HeroSection = () => {
 
       {/* Hero Text Layer */}
       {/* Hero Text Layer - Split for color inversion */}
-      {/* Left Layer (White Text on Dark BG) */}
+      {/* Hero Text Layer - Split for color inversion */}
+      {/* Hero Text Layer - Split for color inversion */}
+      {/* Right Layer (Text clipped to 75-100%, Dark BG, White Text) */}
       <h1 className={`${styles.heroHeading} ${styles.heroHeadingLeft}`}>
-        <span ref={typeTextRefLeft}></span>
-        <span className={styles.cursor}></span>
+        ONE HUB.
+        <span className={styles.indentText}>
+          TOTAL
+          <br />
+          <span className={styles.highlightRed}>CONTROL.</span>
+        </span>
       </h1>
 
-      {/* Right Layer (Black Text on Light BG) */}
+      {/* Left Layer (Text clipped to 0-75%, Light BG, Black Text) */}
       <h1 className={`${styles.heroHeading} ${styles.heroHeadingRight}`}>
-        <span ref={typeTextRefRight}></span>
-        <span className={styles.cursor}></span>
+        ONE HUB.
+        <span className={styles.indentText}>
+          TOTAL
+          <br />
+          <span className={styles.highlightRed}>CONTROL.</span>
+        </span>
       </h1>
 
-      {/* Right Side Floating Glass Messages */}
-      <div className={styles.messageBubbleContainer}>
-        {/* Bubble 1 */}
-        <div className={styles.glassMessage}>
-          <h3 className={styles.subHeading}>One Hub.</h3>
-          <p className={styles.contentPlaceholder}>
-            Total Control. Stop managing disjointed MCP servers.
-          </p>
-        </div>
+      {/* Call To Action Button (Matches the image) */}
+      <button className={styles.ctaButton}>
+        GET IN TOUCH
+        <span className={styles.ctaIcon}>↗</span>
+      </button>
 
-        {/* Bubble 2 */}
-        <div className={styles.glassMessage}>
-          <h3 className={styles.subHeading}>Semantic Pipeline</h3>
-          <p className={styles.contentPlaceholder}>
-            SuperMcp provides a 5-layer semantic agent pipeline with intelligent
-            tool filtering.
-          </p>
-        </div>
-
-        {/* Bubble 3 */}
-        <div className={styles.glassMessage}>
-          <h3 className={styles.subHeading}>Smart Memory</h3>
-          <p className={styles.contentPlaceholder}>
-            Includes parameter validation and multi-turn conversation memory for
-            seamless interactions.
-          </p>
-        </div>
-      </div>
+      {/* Vertical Side Text - Left Corner Watermark */}
+      <div className={styles.verticalSideText}>PETABYTES</div>
 
       <div ref={canvasRef} className={styles.canvasContainer}></div>
     </div>

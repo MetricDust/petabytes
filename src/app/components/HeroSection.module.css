@@ -1,9 +1,25 @@
+@import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap");
+
+/* CSS Variables for Theme */
 .container {
+  --theme-red: #ff0000;
+  --theme-grey-light: #f0f2f5;
+  --theme-grey-dark: #1a1c20;
+  --theme-grey-mid: #3d424b;
+  --theme-text-dark: #1a1a1a;
+
   overflow: hidden;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Orbitron", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   position: relative;
   width: 100vw;
   height: 100vh;
+  background:
+    linear-gradient(90deg, var(--theme-grey-light) 75%, transparent 75%),
+    linear-gradient(
+      180deg,
+      var(--theme-grey-mid) 0%,
+      var(--theme-grey-dark) 100%
+    ); /* Light 75% (Solid), Right 25% (Gradient) */
 }
 
 .canvasContainer {
@@ -18,40 +34,125 @@
 /* Base heading styles */
 .heroHeading {
   position: absolute;
-  top: 15%;
-  left: 0;
-  width: 100%;
-  padding-left: 6%;
-  box-sizing: border-box;
+  top: 18%;
+  left: 10%;
+  width: auto;
   margin: 0;
-  font-size: clamp(4rem, 10vw, 12rem);
-  font-weight: 900;
-  z-index: 1;
+  font-size: clamp(3rem, 6vw, 6rem);
+  font-weight: 700;
+  z-index: 1; /* Text behind 3D elements if they overlap, but visually separated */
   text-transform: uppercase;
-  letter-spacing: -2px;
-  line-height: 0.85;
-  white-space: pre-line;
+  letter-spacing: 2px;
+  line-height: 1.1;
+  pointer-events: none; /* Let clicks pass through to canvas if needed */
 }
 
-/* Left layer: Black text on Light background (0-70%) */
+/* Indent helper for the second block */
+.indentText {
+  display: block;
+  margin-left: 2em; /* Creates the stair-step effect */
+  margin-top: 0.2em;
+}
+
+/* Left layer: Black text on Light background (0-75%) */
 .heroHeadingRight {
-  color: #000000;
-  clip-path: polygon(0 0, 90% 0, 90% 100%, 0 100%);
+  color: var(--theme-text-dark);
+  clip-path: polygon(0 0, 75% 0, 75% 100%, 0 100%);
 }
 
-/* Right layer: White text on Dark background (70-100%) */
+/* Right layer: White text on Dark background (75-100%) */
 .heroHeadingLeft {
   color: #ffffff;
-  clip-path: polygon(90% 0, 100% 0, 100% 100%, 90% 100%);
+  clip-path: polygon(75% 0, 100% 0, 100% 100%, 75% 100%);
+}
+
+.highlightRed {
+  color: var(--theme-red);
+  font-weight: 900;
+}
+
+/* CTA Button */
+.ctaButton {
+  position: absolute;
+  bottom: 12%;
+  left: calc(10% + 2.5em); /* Aligned mathematically with .indentText */
+  padding: 1rem 2.5rem;
+  background-color: var(--theme-red);
+  color: #ffffff; /* White text on red button for better contrast */
+  font-family: "Orbitron", sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  z-index: 20; /* Above canvas for interactivity */
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.heroDescription {
+  position: absolute;
+  top: 55%; /* Below the heading */
+  left: calc(10% + 2.5em); /* Aligned with indentation */
+  width: 32vw;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #555;
+  font-weight: 500;
+  z-index: 15; /* Above canvas to ensure text selection/readability if needed */
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8); /* Ensure readability on light bg */
+}
+
+.ctaButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 0, 0, 0.6);
+}
+
+.ctaIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.2); /* Subtle dark background for icon */
+  color: #fff;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.verticalSideText {
+  position: absolute;
+  top: 50%;
+  left: 76%; /* Just inside the right section (starting at 75%) */
+  transform: translateY(-50%) rotate(180deg);
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+
+  /* Sizing to fit vertically */
+  font-size: 12vh;
+  font-weight: 900;
+
+  /* Outline Only - Red */
+  color: transparent;
+  -webkit-text-stroke: 2px var(--theme-red);
+
+  z-index: 5;
+  pointer-events: none;
+  line-height: 1;
+  text-transform: uppercase;
+  font-family: inherit;
+  letter-spacing: 1vh;
+  white-space: nowrap;
 }
 
 .cursor {
-  display: inline-block;
-  width: 0.1em;
-  height: 0.8em;
-  background-color: #ff0000;
-  margin-left: 8px;
-  animation: blink 1s step-end infinite;
+  display: none; /* Removed as we are using static text */
 }
 
 @keyframes blink {
@@ -72,104 +173,4 @@
   transition: opacity 0.5s ease;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
   z-index: 20;
-}
-
-/* Message Bubble Glass Container - Right Side (Dark Area) */
-.messageBubbleContainer {
-  position: absolute;
-  top: 50%;
-  right: 4%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-  z-index: 15;
-  width: 340px;
-}
-
-/* Glassmorphic Card Style */
-.glassMessage {
-  position: relative;
-  /* Premium White Glass on Dark Background */
-  background: rgba(255, 0, 0, 0.25);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 20px;
-  padding: 24px 28px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-
-  /* REQUESTED: Inset White Shadow + Soft Drop Shadow */
-  box-shadow:
-    inset 0 0 15px rgba(255, 255, 255, 0.2),
-    inset 0 1px 1px rgba(255, 255, 255, 0.6),
-    0 15px 35px rgba(0, 0, 0, 0.25);
-
-  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-  animation: floatBubble 6s ease-in-out infinite;
-}
-
-/* Chat bubble tail */
-.glassMessage::after {
-  content: "";
-  position: absolute;
-  bottom: -8px;
-  right: 32px;
-  width: 24px;
-  height: 24px;
-  background: inherit;
-  backdrop-filter: inherit;
-  -webkit-backdrop-filter: inherit;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.25);
-  border-right: 1px solid rgba(255, 255, 255, 0.25);
-  box-shadow: inset -2px -2px 5px rgba(255, 255, 255, 0.1);
-  transform: rotate(45deg);
-  z-index: -1;
-}
-
-.subHeading {
-  margin: 0 0 8px 0;
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: #000000; /* Changed to black for visibility */
-  letter-spacing: -0.02em;
-}
-
-.contentPlaceholder {
-  margin: 0;
-  font-size: 0.9rem;
-  color: #333333; /* Dark grey for content */
-  line-height: 1.5;
-  font-weight: 500;
-}
-
-@keyframes floatBubble {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-12px);
-  }
-}
-
-.glassMessage:nth-child(2) {
-  animation-delay: 2s;
-  transform: translateX(-20px);
-  animation-name: floatBubbleOffset;
-}
-
-.glassMessage:nth-child(3) {
-  animation-delay: 4s;
-  transform: translateX(10px);
-  animation-name: floatBubble;
-}
-
-@keyframes floatBubbleOffset {
-  0%,
-  100% {
-    transform: translate(-20px, 0);
-  }
-  50% {
-    transform: translate(-20px, -12px);
-  }
 }
