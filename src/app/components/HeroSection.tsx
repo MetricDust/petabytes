@@ -13,12 +13,57 @@ const HeroSection = () => {
   const controlsRef = useRef<OrbitControls | null>(null);
   const animationFrameIdRef = useRef<number | null>(null);
 
-  // Typewriter refs
-  const typeTextRefLeft = useRef<HTMLSpanElement>(null);
-  const typeTextRefRight = useRef<HTMLSpanElement>(null);
-
   // Loading state
   const [isLoading, setIsLoading] = useState(true);
+
+  // --- TYPEWRITER EFFECT FOR HEADING ---
+  const [typedText, setTypedText] = useState({
+    line1: "",
+    line2: "",
+    line3: "",
+  });
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    const fullText = {
+      line1: "ONE HUB.",
+      line2: "TOTAL",
+      line3: "CONTROL.",
+    };
+
+    let currentLine = 1;
+    let charIndex = 0;
+
+    const typeInterval = setInterval(() => {
+      setTypedText((prev) => {
+        const newState = { ...prev };
+
+        if (currentLine === 1) {
+          newState.line1 = fullText.line1.slice(0, charIndex + 1);
+          if (charIndex === fullText.line1.length - 1) {
+            currentLine++;
+            charIndex = -1;
+          }
+        } else if (currentLine === 2) {
+          newState.line2 = fullText.line2.slice(0, charIndex + 1);
+          if (charIndex === fullText.line2.length - 1) {
+            currentLine++;
+            charIndex = -1;
+          }
+        } else if (currentLine === 3) {
+          newState.line3 = fullText.line3.slice(0, charIndex + 1);
+          if (charIndex === fullText.line3.length - 1) {
+            clearInterval(typeInterval);
+          }
+        }
+        return newState;
+      });
+      charIndex++;
+    }, 50);
+
+    return () => clearInterval(typeInterval);
+  }, [isLoading]);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -536,65 +581,57 @@ const HeroSection = () => {
     };
     window.addEventListener("resize", onWindowResize, false);
 
-    // --- TYPEWRITER EFFECT ---
-    // Delay start to allow the 3D scene to pop in first
-    const typeTimer = setTimeout(() => {
-      const textToType = "PETA\nBYTES";
-      let i = 0;
-      const type = () => {
-        if (!typeTextRefLeft.current || !typeTextRefRight.current) return;
-        if (i < textToType.length) {
-          const char = textToType.charAt(i);
-          typeTextRefLeft.current.textContent += char;
-          typeTextRefRight.current.textContent += char;
-          i++;
-          setTimeout(type, 50 + Math.random() * 100);
-        }
-      };
-      type();
-    }, 600);
-
     // Cleanup
     return () => {
       if (animationFrameIdRef.current)
         cancelAnimationFrame(animationFrameIdRef.current);
       window.removeEventListener("resize", onWindowResize);
-      clearTimeout(typeTimer);
       cleanupInteraction();
       if (rendererRef.current && canvasRef.current) {
         canvasRef.current.removeChild(rendererRef.current.domElement);
         rendererRef.current.dispose();
       }
     };
-  }, []);
+  }, []); // Removed isLoading dependency
 
   return (
     <div className={styles.container}>
       {isLoading && (
-        <div className={styles.loading}>GENERATING PROCEDURAL GEOMETRY...</div>
+        <div className={styles.loadingContainer}>
+          <div className={styles.loader}>
+            <div className={styles.scanner}></div>
+            <div className={styles.loaderCircle}></div>
+          </div>
+          <div className={styles.loadingText}>
+            SYSTEM INITIALIZATION
+            <span className={styles.loadingDots}>...</span>
+          </div>
+          <div className={styles.loadingBar}>
+            <div className={styles.loadingBarProgress}></div>
+          </div>
+        </div>
       )}
 
       {/* Hero Text Layer */}
       {/* Hero Text Layer - Split for color inversion */}
-      {/* Hero Text Layer - Split for color inversion */}
-      {/* Hero Text Layer - Split for color inversion */}
+
       {/* Right Layer (Text clipped to 75-100%, Dark BG, White Text) */}
       <h1 className={`${styles.heroHeading} ${styles.heroHeadingLeft}`}>
-        ONE HUB.
+        {typedText.line1}
         <span className={styles.indentText}>
-          TOTAL
+          {typedText.line2}
           <br />
-          <span className={styles.highlightRed}>CONTROL.</span>
+          <span className={styles.highlightRed}>{typedText.line3}</span>
         </span>
       </h1>
 
       {/* Left Layer (Text clipped to 0-75%, Light BG, Black Text) */}
       <h1 className={`${styles.heroHeading} ${styles.heroHeadingRight}`}>
-        ONE HUB.
+        {typedText.line1}
         <span className={styles.indentText}>
-          TOTAL
+          {typedText.line2}
           <br />
-          <span className={styles.highlightRed}>CONTROL.</span>
+          <span className={styles.highlightRed}>{typedText.line3}</span>
         </span>
       </h1>
 
@@ -606,6 +643,14 @@ const HeroSection = () => {
 
       {/* Vertical Side Text - Left Corner Watermark */}
       <div className={styles.verticalSideText}>PETABYTES</div>
+
+      {/* Electric Flow Lines - Right Side */}
+      <div className={styles.electricLines}>
+        <div className={styles.line}></div>
+        <div className={styles.line}></div>
+        <div className={styles.line}></div>
+        <div className={styles.line}></div>
+      </div>
 
       <div ref={canvasRef} className={styles.canvasContainer}></div>
     </div>

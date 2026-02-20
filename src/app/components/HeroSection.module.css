@@ -45,6 +45,7 @@
   letter-spacing: 2px;
   line-height: 1.1;
   pointer-events: none; /* Let clicks pass through to canvas if needed */
+  min-height: 7rem; /* Prevent layout collapse while typing */
 }
 
 /* Indent helper for the second block */
@@ -151,26 +152,223 @@
   white-space: nowrap;
 }
 
+/* Electric Flow Lines */
+.electricLines {
+  position: absolute;
+  top: 0;
+  right: 2%; /* Positioned on the far right */
+  width: 15%; /* Approx width of the right dark column excluding text area */
+  height: 100vh;
+  z-index: 4; /* Below text mostly, but visible */
+  display: flex;
+  justify-content: space-evenly;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.line {
+  position: relative;
+  width: 1px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.05); /* Faint track */
+  overflow: hidden;
+}
+
+/* The flowing energy pulse */
+.line::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: 0;
+  width: 100%;
+  height: 40%;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--theme-red),
+    #fff,
+    var(--theme-red),
+    transparent
+  );
+  animation: electricFlow 3s infinite linear;
+  box-shadow: 0 0 10px var(--theme-red);
+}
+
+/* Staggered Animations */
+.line:nth-child(1)::after {
+  animation-duration: 2.5s;
+  animation-delay: 0s;
+  opacity: 0.8;
+}
+.line:nth-child(2)::after {
+  animation-duration: 3.5s;
+  animation-delay: 1.2s;
+  opacity: 0.5;
+}
+.line:nth-child(3)::after {
+  animation-duration: 2.8s;
+  animation-delay: 0.5s;
+  opacity: 0.9;
+}
+.line:nth-child(4)::after {
+  animation-duration: 4s;
+  animation-delay: 2s;
+  opacity: 0.6;
+}
+
+@keyframes electricFlow {
+  0% {
+    top: -50%;
+  }
+  100% {
+    top: 100%;
+  }
+}
+
 .cursor {
   display: none; /* Removed as we are using static text */
 }
 
-@keyframes blink {
-  50% {
-    opacity: 0;
-  }
+/* LOADING SCREEN */
+.loadingContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--theme-grey-dark);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: var(--theme-red);
+  font-family: "Orbitron", sans-serif;
+  letter-spacing: 2px;
 }
 
-.loading {
+.loader {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin-bottom: 2rem;
+}
+
+/* Outer rotating ring */
+.loaderCircle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 4px solid rgba(255, 0, 0, 0.2);
+  border-top: 4px solid var(--theme-red);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+}
+
+/* Inner pulsing core/scanner */
+.scanner {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: #ff9d00;
+  width: 60%;
+  height: 60%;
+  background: radial-gradient(circle, var(--theme-red) 0%, transparent 70%);
+  opacity: 0.5;
+  animation: pulse 1.5s ease-in-out infinite;
+  border-radius: 50%;
+}
+
+.loadingText {
   font-size: 1.2rem;
-  font-weight: bold;
-  pointer-events: none;
-  transition: opacity 0.5s ease;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-  z-index: 20;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+  display: flex;
+  align-items: baseline;
+}
+
+.loadingDots {
+  display: inline-block;
+  width: 1em;
+  text-align: left;
+  animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+  0%,
+  20% {
+    content: ".";
+  }
+  40% {
+    content: "..";
+  }
+  60% {
+    content: "...";
+  }
+  80%,
+  100% {
+    content: "";
+  }
+}
+
+.loadingBar {
+  width: 300px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.loadingBarProgress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background: var(--theme-red);
+  transform-origin: left;
+  animation: loadProgress 2s ease-in-out infinite;
+  box-shadow: 0 0 10px var(--theme-red);
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0.3;
+  }
+}
+
+@keyframes loadProgress {
+  0% {
+    transform: scaleX(0);
+  }
+  50% {
+    transform: scaleX(0.7);
+  }
+  100% {
+    transform: scaleX(1);
+  }
 }
