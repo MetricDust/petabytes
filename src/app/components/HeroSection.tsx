@@ -14,12 +14,23 @@ const HeroSection = () => {
   const animationFrameIdRef = useRef<number | null>(null);
 
   // Typewriter refs
-  const typeTextRef = useRef<HTMLSpanElement>(null);
+  const typeTextRefLeft = useRef<HTMLSpanElement>(null);
+  const typeTextRefRight = useRef<HTMLSpanElement>(null);
 
   // Loading state
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    if (!canvasRef.current) return;
+
+    // ... (existing Three.js setup code is unchanged) ...
+    // Note: I will need to be careful with the context since I'm doing a replace.
+    // However, since the instruction is to replace a block that includes the typewriter logic, I'll need to rewrite the typewriter logic.
+    // Let's use multi_replace for better control or just target specific blocks.
+    // Actually, I can target the component return and the ref definitions separately.
+
+    // SKIPPING LARGE CHUNK OF THREEJS CODE -- I should use multi_replace to target the refs and the return statement separately.
+    // But wait, the `useEffect` contains the typewriter logic too.
     if (!canvasRef.current) return;
 
     // --- ARCHITECTURE SETUP ---
@@ -530,9 +541,11 @@ const HeroSection = () => {
       const textToType = "PETA\nBYTES";
       let i = 0;
       const type = () => {
-        if (!typeTextRef.current) return;
+        if (!typeTextRefLeft.current || !typeTextRefRight.current) return;
         if (i < textToType.length) {
-          typeTextRef.current.textContent += textToType.charAt(i);
+          const char = textToType.charAt(i);
+          typeTextRefLeft.current.textContent += char;
+          typeTextRefRight.current.textContent += char;
           i++;
           setTimeout(type, 50 + Math.random() * 100);
         }
@@ -561,10 +574,47 @@ const HeroSection = () => {
       )}
 
       {/* Hero Text Layer */}
-      <h1 className={styles.heroHeading}>
-        <span ref={typeTextRef}></span>
+      {/* Hero Text Layer - Split for color inversion */}
+      {/* Left Layer (White Text on Dark BG) */}
+      <h1 className={`${styles.heroHeading} ${styles.heroHeadingLeft}`}>
+        <span ref={typeTextRefLeft}></span>
         <span className={styles.cursor}></span>
       </h1>
+
+      {/* Right Layer (Black Text on Light BG) */}
+      <h1 className={`${styles.heroHeading} ${styles.heroHeadingRight}`}>
+        <span ref={typeTextRefRight}></span>
+        <span className={styles.cursor}></span>
+      </h1>
+
+      {/* Right Side Floating Glass Messages */}
+      <div className={styles.messageBubbleContainer}>
+        {/* Bubble 1 */}
+        <div className={styles.glassMessage}>
+          <h3 className={styles.subHeading}>One Hub.</h3>
+          <p className={styles.contentPlaceholder}>
+            Total Control. Stop managing disjointed MCP servers.
+          </p>
+        </div>
+
+        {/* Bubble 2 */}
+        <div className={styles.glassMessage}>
+          <h3 className={styles.subHeading}>Semantic Pipeline</h3>
+          <p className={styles.contentPlaceholder}>
+            SuperMcp provides a 5-layer semantic agent pipeline with intelligent
+            tool filtering.
+          </p>
+        </div>
+
+        {/* Bubble 3 */}
+        <div className={styles.glassMessage}>
+          <h3 className={styles.subHeading}>Smart Memory</h3>
+          <p className={styles.contentPlaceholder}>
+            Includes parameter validation and multi-turn conversation memory for
+            seamless interactions.
+          </p>
+        </div>
+      </div>
 
       <div ref={canvasRef} className={styles.canvasContainer}></div>
     </div>
