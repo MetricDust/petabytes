@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import BlackHoleGlobe from "./BlackHoleGlobe";
 
 export default function HeroSection() {
@@ -22,9 +23,12 @@ export default function HeroSection() {
       <div className="absolute inset-0 z-20 flex flex-col justify-between p-6 md:p-12 pointer-events-none">
         {/* Header */}
         <header className="flex items-center justify-between w-full pointer-events-auto">
-          <div className="text-xl font-semibold tracking-widest uppercase">
+          <Link
+            href="/"
+            className="text-xl font-semibold tracking-widest uppercase cursor-pointer"
+          >
             PETABYTES
-          </div>
+          </Link>
 
           {/* <nav className="hidden md:flex items-center space-x-8 text-sm text-gray-300 font-medium">
             <a href="#" className="hover:text-white transition-colors">
@@ -38,9 +42,11 @@ export default function HeroSection() {
             </a>
           </nav> */}
 
-          <button className="px-5 py-2 text-xs font-semibold tracking-wider uppercase border border-white/40 rounded-full hover:bg-white hover:text-black transition-all">
-            Contact
-          </button>
+          <Link href="/contact">
+            <button className="px-5 py-2 text-xs font-semibold tracking-wider uppercase border border-white/40 rounded-full hover:bg-white hover:text-black transition-all">
+              Contact
+            </button>
+          </Link>
         </header>
 
         {/* Floating AI Pipeline Layers around the Globe (Box Layout) */}

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import WatermarkFooter from "../components/WatermarkFooter";
 
 export const metadata: Metadata = {
   title: "Hello World",
@@ -13,7 +14,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+        <WatermarkFooter />
+      </body>
     </html>
   );
 }

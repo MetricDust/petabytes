@@ -3,7 +3,9 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 
-export default function BlackHoleGlobe() {
+export default function BlackHoleGlobe({
+  cameraDistance = 80,
+}: { cameraDistance?: number } = {}) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -34,7 +36,7 @@ export default function BlackHoleGlobe() {
 
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
     // Move camera back to make the globe smaller, and move camera up to push the globe down on screen
-    camera.position.set(0, 0, 80);
+    camera.position.set(0, 0, cameraDistance);
 
     // 2. Glowing Aura (Sprite replacing UnrealBloomPass for perfect transparency)
     const canvas = document.createElement("canvas");
@@ -274,5 +276,5 @@ export default function BlackHoleGlobe() {
     };
   }, []);
 
-  return <div ref={containerRef} className="w-full h-full" />;
+  return <div ref={containerRef} className="w-full h-full overflow-visible" />;
 }
