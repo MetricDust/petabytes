@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import BlackHoleGlobe from "./BlackHoleGlobe";
 
@@ -7,7 +10,7 @@ export default function HeroSection() {
     <section className="relative w-full h-screen overflow-hidden text-white font-sans">
       {/* Background Image */}
       <Image
-        src="/assets/images/bg_1.png"
+        src={`${process.env.NEXT_PUBLIC_BASE_PATH || ""}/assets/images/bg_1.png`}
         alt="Hero Background"
         fill
         className="object-cover object-center z-0"
@@ -52,58 +55,138 @@ export default function HeroSection() {
         {/* Floating AI Pipeline Layers around the Globe (Box Layout) */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none transform -translate-y-16 lg:-translate-y-24">
           {/* Top: Agent Layer */}
-          <div className="absolute transform -translate-y-[180px] md:-translate-y-[280px] text-center flex flex-col items-center border border-white/10 rounded-2xl px-6 py-3 bg-black/30 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_0_15px_rgba(255,255,255,0.2)]">
-            <span className="w-2 h-2 rounded-full bg-white mb-2 shadow-[0_0_15px_rgba(255,255,255,1)]"></span>
-            <p className="text-base md:text-lg font-bold tracking-wide text-white whitespace-nowrap">
-              Agent Layer
-            </p>
-            <p className="text-[10px] md:text-xs text-cyan-200/90 mt-1 uppercase tracking-wider font-medium">
-              Haystack + ReAct
-            </p>
+          <div className="absolute transform -translate-y-[180px] md:-translate-y-[280px]">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 15 }}
+              animate={{
+                opacity: [0, 1, 1, 0, 0],
+                scale: [0.9, 1, 1, 0.95, 0.95],
+                y: [15, 0, 0, -10, -10],
+              }}
+              transition={{
+                duration: 6,
+                repeat: Infinity,
+                times: [0, 0.1, 0.8, 0.9, 1],
+                ease: "easeInOut",
+              }}
+              className="text-center flex flex-col items-center border border-white/10 rounded-2xl px-6 py-3 bg-black/30 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_0_15px_rgba(255,255,255,0.2)]"
+            >
+              <span className="w-2 h-2 rounded-full bg-white mb-2 shadow-[0_0_15px_rgba(255,255,255,1)]"></span>
+              <p className="text-base md:text-lg font-bold tracking-wide text-white whitespace-nowrap">
+                Agent Layer
+              </p>
+              <p className="text-[10px] md:text-xs text-cyan-200/90 mt-1 uppercase tracking-wider font-medium">
+                Haystack + ReAct
+              </p>
+            </motion.div>
           </div>
 
           {/* Left: Cache Layer */}
-          <div className="absolute transform -translate-x-[160px] md:-translate-x-[380px] text-center flex flex-col items-center border border-white/10 rounded-2xl px-5 py-3 bg-black/30 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_0_15px_rgba(255,255,255,0.2)]">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mb-2 shadow-[0_0_10px_rgba(34,211,238,0.8)]"></span>
-            <p className="text-sm md:text-base font-medium tracking-wide text-white whitespace-nowrap">
-              Cache Layer
-            </p>
-            <p className="text-[10px] md:text-xs text-blue-200/70 mt-1 uppercase tracking-wider">
-              LRU Cache + TTL
-            </p>
+          <div className="absolute transform -translate-x-[160px] md:-translate-x-[380px]">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 15 }}
+              animate={{
+                opacity: [0, 1, 1, 0, 0],
+                scale: [0.9, 1, 1, 0.95, 0.95],
+                y: [15, 0, 0, -10, -10],
+              }}
+              transition={{
+                duration: 6,
+                repeat: Infinity,
+                times: [0, 0.1, 0.8, 0.9, 1],
+                ease: "easeInOut",
+              }}
+              className="text-center flex flex-col items-center border border-white/10 rounded-2xl px-5 py-3 bg-black/30 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_0_15px_rgba(255,255,255,0.2)]"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mb-2 shadow-[0_0_10px_rgba(34,211,238,0.8)]"></span>
+              <p className="text-sm md:text-base font-medium tracking-wide text-white whitespace-nowrap">
+                Cache Layer
+              </p>
+              <p className="text-[10px] md:text-xs text-blue-200/70 mt-1 uppercase tracking-wider">
+                LRU Cache + TTL
+              </p>
+            </motion.div>
           </div>
 
           {/* Right: Response Layer */}
-          <div className="absolute transform translate-x-[160px] md:translate-x-[380px] text-center flex flex-col items-center border border-white/10 rounded-2xl px-5 py-3 bg-black/30 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_0_15px_rgba(255,255,255,0.2)]">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mb-2 shadow-[0_0_10px_rgba(34,211,238,0.8)]"></span>
-            <p className="text-sm md:text-base font-medium tracking-wide text-white whitespace-nowrap">
-              Response Layer
-            </p>
-            <p className="text-[10px] md:text-xs text-blue-200/70 mt-1 uppercase tracking-wider">
-              Natural Language
-            </p>
+          <div className="absolute transform translate-x-[160px] md:translate-x-[380px]">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 15 }}
+              animate={{
+                opacity: [0, 1, 1, 0, 0],
+                scale: [0.9, 1, 1, 0.95, 0.95],
+                y: [15, 0, 0, -10, -10],
+              }}
+              transition={{
+                duration: 6,
+                repeat: Infinity,
+                times: [0, 0.1, 0.8, 0.9, 1],
+                ease: "easeInOut",
+              }}
+              className="text-center flex flex-col items-center border border-white/10 rounded-2xl px-5 py-3 bg-black/30 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_0_15px_rgba(255,255,255,0.2)]"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mb-2 shadow-[0_0_10px_rgba(34,211,238,0.8)]"></span>
+              <p className="text-sm md:text-base font-medium tracking-wide text-white whitespace-nowrap">
+                Response Layer
+              </p>
+              <p className="text-[10px] md:text-xs text-blue-200/70 mt-1 uppercase tracking-wider">
+                Natural Language
+              </p>
+            </motion.div>
           </div>
 
           {/* Bottom Left: Filter Layer */}
-          <div className="mt-50 absolute transform -translate-x-[120px] md:-translate-x-[220px] translate-y-[140px] md:translate-y-[200px] text-center flex flex-col items-center border border-white/10 rounded-2xl px-5 py-3 bg-black/30 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_0_15px_rgba(255,255,255,0.2)]">
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 mb-2 shadow-[0_0_10px_rgba(96,165,250,0.8)]"></span>
-            <p className="text-sm md:text-base font-medium tracking-wide text-white whitespace-nowrap">
-              Filter Layer
-            </p>
-            <p className="text-[10px] md:text-xs text-blue-200/70 mt-1 uppercase tracking-wider">
-              Semantic E5 Filter
-            </p>
+          <div className="mt-50 absolute transform -translate-x-[120px] md:-translate-x-[220px] translate-y-[140px] md:translate-y-[200px]">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 15 }}
+              animate={{
+                opacity: [0, 1, 1, 0, 0],
+                scale: [0.9, 1, 1, 0.95, 0.95],
+                y: [15, 0, 0, -10, -10],
+              }}
+              transition={{
+                duration: 6,
+                repeat: Infinity,
+                times: [0, 0.1, 0.8, 0.9, 1],
+                ease: "easeInOut",
+              }}
+              className="text-center flex flex-col items-center border border-white/10 rounded-2xl px-5 py-3 bg-black/30 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_0_15px_rgba(255,255,255,0.2)]"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 mb-2 shadow-[0_0_10px_rgba(96,165,250,0.8)]"></span>
+              <p className="text-sm md:text-base font-medium tracking-wide text-white whitespace-nowrap">
+                Filter Layer
+              </p>
+              <p className="text-[10px] md:text-xs text-blue-200/70 mt-1 uppercase tracking-wider">
+                Semantic E5 Filter
+              </p>
+            </motion.div>
           </div>
 
           {/* Bottom Right: Validation Layer */}
-          <div className="mt-50 absolute transform translate-x-[120px] md:translate-x-[220px] translate-y-[140px] md:translate-y-[200px] text-center flex flex-col items-center border border-white/10 rounded-2xl px-5 py-3 bg-black/30 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_0_15px_rgba(255,255,255,0.2)]">
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 mb-2 shadow-[0_0_10px_rgba(96,165,250,0.8)]"></span>
-            <p className="text-sm md:text-base font-medium tracking-wide text-white whitespace-nowrap">
-              Validation Layer
-            </p>
-            <p className="text-[10px] md:text-xs text-blue-200/70 mt-1 uppercase tracking-wider">
-              Parameter Validation
-            </p>
+          <div className="mt-50 absolute transform translate-x-[120px] md:translate-x-[220px] translate-y-[140px] md:translate-y-[200px]">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 15 }}
+              animate={{
+                opacity: [0, 1, 1, 0, 0],
+                scale: [0.9, 1, 1, 0.95, 0.95],
+                y: [15, 0, 0, -10, -10],
+              }}
+              transition={{
+                duration: 6,
+                repeat: Infinity,
+                times: [0, 0.1, 0.8, 0.9, 1],
+                ease: "easeInOut",
+              }}
+              className="text-center flex flex-col items-center border border-white/10 rounded-2xl px-5 py-3 bg-black/30 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_0_15px_rgba(255,255,255,0.2)]"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 mb-2 shadow-[0_0_10px_rgba(96,165,250,0.8)]"></span>
+              <p className="text-sm md:text-base font-medium tracking-wide text-white whitespace-nowrap">
+                Validation Layer
+              </p>
+              <p className="text-[10px] md:text-xs text-blue-200/70 mt-1 uppercase tracking-wider">
+                Parameter Validation
+              </p>
+            </motion.div>
           </div>
         </div>
 
@@ -122,7 +205,10 @@ export default function HeroSection() {
               <br />
               Featuring MCP integration and semantic tool filtering.
             </p>
-            <button className="px-8 py-3 text-sm font-bold text-black bg-white rounded-full hover:bg-gray-200 transition-colors">
+            <button
+              onClick={() => (window.location.href = "/contact")}
+              className="px-8 py-3 text-sm font-bold text-black bg-white rounded-full hover:bg-gray-200 transition-colors"
+            >
               JOIN WAITING LIST
             </button>
           </div>

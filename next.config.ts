@@ -12,6 +12,9 @@ const nextConfig: NextConfig = {
     basePath: "/petabytes",
     assetPrefix: "/petabytes",
   }),
+  env: {
+    NEXT_PUBLIC_BASE_PATH: isProduction ? "/petabytes" : "",
+  },
 };
 
 export default nextConfig;

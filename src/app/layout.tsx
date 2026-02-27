@@ -3,8 +3,8 @@ import "./globals.css";
 import WatermarkFooter from "../components/WatermarkFooter";
 
 export const metadata: Metadata = {
-  title: "Hello World",
-  description: "A simple hello world page",
+  title: "Petabytes",
+  description: "One hub for all your mcp needs",
 };
 
 export default function RootLayout({
