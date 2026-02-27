@@ -45,10 +45,20 @@ export default function HeroSection() {
             </a>
           </nav> */}
 
-          <Link href="/contact">
-            <button className="px-5 py-2 text-xs font-semibold tracking-wider uppercase border border-white/40 rounded-full hover:bg-white hover:text-black transition-all">
+          <Link href="/contact" className="relative group inline-block">
+            {/* Shooting Border Beam */}
+            <div className="absolute -inset-[1.5px] rounded-full overflow-hidden">
+              <div
+                className="absolute inset-[-1000%] animate-spin bg-[conic-gradient(from_90deg_at_50%_50%,#00d2ff_0deg,transparent_40deg,transparent_320deg,#00d2ff_360deg)]"
+                style={{ animationDuration: "3s" }}
+              />
+            </div>
+            {/* Button Surface */}
+            <button className="relative px-5 py-2 text-xs font-semibold tracking-wider uppercase bg-black/80 backdrop-blur-sm rounded-full transition-all group-hover:bg-white group-hover:text-black">
               Contact
             </button>
+            {/* Outer Glow - subtle when idle, strong on hover */}
+            <div className="absolute -inset-[2px] rounded-full bg-cyan-500/10 blur-md group-hover:bg-cyan-500/40 transition-all duration-500" />
           </Link>
         </header>
 
@@ -199,7 +209,7 @@ export default function HeroSection() {
           <div className="max-w-2xl mb-8 md:mb-0">
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-tight">
               ONE HUB <br />
-              TOTAL CONTROL
+              <span className="ml-25">TOTAL CONTROL</span>
             </h1>
           </div>
 

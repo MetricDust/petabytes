@@ -23,10 +23,20 @@ export default function ContactPage() {
         >
           PETABYTES
         </Link>
-        <Link href="/">
-          <button className="flex items-center gap-2 px-5 py-2 text-xs font-semibold tracking-wider uppercase border border-white/40 rounded-full hover:bg-white hover:text-black transition-all">
+        <Link href="/" className="relative group inline-block">
+          {/* Shooting Border Beam */}
+          <div className="absolute -inset-[1.5px] rounded-full overflow-hidden">
+            <div
+              className="absolute inset-[-1000%] animate-spin bg-[conic-gradient(from_90deg_at_50%_50%,#00d2ff_0deg,transparent_40deg,transparent_320deg,#00d2ff_360deg)]"
+              style={{ animationDuration: "3s" }}
+            />
+          </div>
+          {/* Button Surface */}
+          <button className="relative flex items-center gap-2 px-5 py-2 text-xs font-semibold tracking-wider uppercase bg-black/80 backdrop-blur-sm rounded-full transition-all group-hover:bg-white group-hover:text-black">
             <ArrowLeft size={14} /> Back
           </button>
+          {/* Outer Glow - subtle when idle, strong on hover */}
+          <div className="absolute -inset-[2px] rounded-full bg-cyan-500/10 blur-md group-hover:bg-cyan-500/40 transition-all duration-500" />
         </Link>
       </header>
 
